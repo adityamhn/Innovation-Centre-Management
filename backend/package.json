@@ -1,0 +1,29 @@
+{
+  "name": "ic-management",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node dist/server.js",
+    "watch": "tsc -w",
+    "dev": "nodemon dist/server.js",
+    "dev2": "nodemon src/server.ts",
+    "build": "tsc -p ./tsconfig.json",
+    "lint": "eslint . --config .eslintrc.json",
+    "lint:fix": "eslint . --fix --config .eslintrc.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.3"
+  }
+}
