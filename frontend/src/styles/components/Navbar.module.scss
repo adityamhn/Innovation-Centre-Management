@@ -1,0 +1,54 @@
+@import "../_variables";
+
+.navbarContainer {
+    min-height: 120px;
+    padding: 0 4rem;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    margin: 0;
+
+    .logoContainer {
+        gap: 10px;
+        .mahe {
+            height: 120px;
+        }
+
+        .logoText {
+            .logoName {
+                font-size: nth($fontSize, 5);
+                font-weight: 600;
+                color: var(--mahe);
+            }
+
+            .logoDesc {
+                font-size: nth($fontSize, 2);
+                color: var( --text-secondary);
+
+            }
+        }
+    }
+
+    .navItemsContainer {
+        gap: 1.8rem;
+
+        .navItem {
+            font-size: nth($fontSize, 3);
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                color: var(--mahe);
+            }
+        }
+
+        .activeNavItem {
+            color: var(--mahe);
+        }
+
+        .loginButton {
+            width: fit-content;
+        }
+    }
+}

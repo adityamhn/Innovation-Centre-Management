@@ -1,0 +1,25 @@
+@import "../_variables";
+
+.homeContainer {
+    padding: 0 4rem;
+    // min-height: calc(100vh - 120px);
+
+    .homeContent {
+        display: flex;
+        flex-direction: column;
+        padding-top: 8rem;
+
+        .homeTitle {
+            font-size: nth($fontSize,10);
+            margin-bottom: 0;
+        }
+
+        .homeDesc {
+            width: 50%;
+            font-size: nth($fontSize,5);
+            margin-bottom: 0;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+    }
+}

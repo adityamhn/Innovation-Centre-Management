@@ -1,0 +1,37 @@
+:root {
+  /* background colors */
+  --bg: #f5f5f5;
+  --card-bg: #e5e5e5;
+  --active-bg: #ccc;
+  --active-bg-hover: #aaa;
+
+  /* text colors */
+  --text: #1d1d1d;
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --mahe: #e8590c;
+  --button-text: #fff;
+  --button-text-secondary: #f1f1f1;
+  --button-text-hover: #333;
+
+  --placeholder: #7c7c7c;
+  --text-hover: rgba(0, 0, 0, 0.7);
+  --text-500: rgba(0, 0, 0, 0.5);
+  --text-600: rgba(0, 0, 0, 0.6);
+  --text-100: rgba(0, 0, 0, 0.1);
+
+  /* main colors */
+  --primary: #e8590c;
+  --success: #5cb85c;
+  --danger: #d9534f;
+
+  /* form colors */
+  --input-border-primary: rgba(0, 0, 0, 0.8);
+  --input-border-secondary: rgba(0, 0, 0, 0.1);
+  --input-bg: #e5e5e5;
+
+  /* border colors */
+  --border: rgba(0, 0, 0, 0.1);
+
+  /* sidebar colors */
+  --sidebar-active: #aaa;
+}

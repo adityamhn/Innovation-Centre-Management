@@ -1,0 +1,19 @@
+@import "../_variables";
+
+
+.loginContainer {
+
+
+    .authForm {
+        margin-top: 2.5rem;
+
+        .authEmailInput {
+            width: 35rem;
+        }
+
+        .loginButton {
+            width: fit-content;
+            padding: 0 1.6rem;
+        }
+    }
+}
