@@ -1,16 +1,34 @@
 // Express
 import express from "express";
+
 // CORS
 import cors from "cors";
 
+// Cookie Parser and Session
+import cookieParser from "cookie-parser";
+import session from "express-session";
 
+import { createClient } from "redis";
+import RedisStore from "connect-redis";
+
+import { authRoutes } from "./routes/auth.routes";
+import { adminRoutes } from "./routes/admin.routes";
+
+declare module "express-session" {
+  export interface SessionData {
+    user: { userId: string };
+    environment: string;
+  }
+}
 
 const initializeApp = async () => {
 
-
   const app = express();
+
   const port = process.env.PORT ?? (8080 as number);
   const DEPLOYMENT = process.env.DEPLOYMENT ?? "LOCAL";
+  const SESS_NAME = process.env.SESS_NAME;
+  const SESS_SECRET = process.env.SESS_SECRET;
 
   app.use(
     express.urlencoded({
@@ -32,7 +50,7 @@ const initializeApp = async () => {
     });
   });
 
-
+  app.use(cookieParser());
 
 
   const localWhitelist = [
@@ -74,10 +92,35 @@ const initializeApp = async () => {
 
   app.use(cors(corsOptions));
 
+    // @ts-ignore
+    let redisStore = new RedisStore({ client: redisClient });
+
+    const sessionConfig = {
+      secret: SESS_SECRET as string,
+      resave: false,
+      name: SESS_NAME as string,
+      saveUninitialized: false,
+      proxy: true,
+      store: redisStore,
+      cookie: {
+        sameSite: true,
+        secure: DEPLOYMENT === "LOCAL" ? false : true,
+        maxAge: 1000 * 60 * 60 * 12,
+      },
+    };
+  
+    app.use(session(sessionConfig));
+
 
   app.get("/", (req, res) => {
     res.send("MIT Innovation Centre Management Portal!");
   });
+
+  // Admin routes
+  app.use("/api/admin", adminRoutes);
+
+  // Auth routes
+  app.use("/api/auth", authRoutes);
 
 
 

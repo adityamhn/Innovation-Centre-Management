@@ -32,5 +32,16 @@ services:
   #   stdin_open: true
   #   tty: true
 
-volumes: 
+  redis:
+    image: redis:latest
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    restart: always
+
+volumes:
   db:
+    driver: local
+  redis-data:
+    driver: local
