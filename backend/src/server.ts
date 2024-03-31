@@ -11,6 +11,8 @@ import session from "express-session";
 import { createClient } from "redis";
 import RedisStore from "connect-redis";
 
+require("dotenv").config();
+
 import { authRoutes } from "./routes/auth.routes";
 import { adminRoutes } from "./routes/admin.routes";
 
@@ -29,6 +31,9 @@ const initializeApp = async () => {
   const DEPLOYMENT = process.env.DEPLOYMENT ?? "LOCAL";
   const SESS_NAME = process.env.SESS_NAME;
   const SESS_SECRET = process.env.SESS_SECRET;
+
+  const redisClient = createClient();
+
 
   app.use(
     express.urlencoded({
@@ -125,6 +130,13 @@ const initializeApp = async () => {
 
 
   app.listen(port, async () => {
+    try {
+      await redisClient.connect();
+      console.log(`Redis connected`);
+    } catch (err) {
+      console.log(err);
+    }
+    
     console.log(`Express is listening at http://localhost:${port}`);
   });
 };

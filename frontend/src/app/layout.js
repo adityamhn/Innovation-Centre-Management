@@ -1,6 +1,7 @@
 import { Inter as Font } from "next/font/google";
 import "./globals.scss";
 import QueryClientContext from "@/components/common/constants/QueryClient";
+import StoreProvider from "@/components/common/constants/StoreProvider";
 
 const font = Font({
   subsets: ["latin"],
@@ -16,7 +17,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={font.className}>
-        <QueryClientContext>{children}</QueryClientContext>
+        <StoreProvider>
+          <QueryClientContext>{children}</QueryClientContext>
+        </StoreProvider>
       </body>
     </html>
   );

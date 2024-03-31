@@ -2,9 +2,9 @@ import Navbar from "@/components/common/navbar/Navbar";
 import React from "react";
 import styles from "@/styles/pages/Layout.module.scss";
 import { cookies } from "next/headers";
-import Redirect from "@/components/common/constants/Redirect";
 import { useServerSide } from "@/services/constants";
 import { checkUserLoginStatus } from "@/services/auth.service";
+import Redirect from "@/components/common/constants/Redirect";
 
 const LoginLayout = async ({ children }) => {
   const cookieStore = cookies();
@@ -15,21 +15,22 @@ const LoginLayout = async ({ children }) => {
   );
 
   if (data?.isLoggedIn && !data?.is_admin) {
-    return <Redirect to="/dashboard" update={data?.user}   />;
+    return <Redirect to="/dashboard" update={data?.user}  />;
   }
 
   return (
     <>
       <Navbar />
       <div className={styles.layoutContainer}>
-        <div className={styles.layoutContent}>
-          <h1 className={styles.layoutTitle}>Login to MIT Innovation Centre</h1>
+      <div className={styles.layoutContent}>
+          <h1 className={styles.layoutTitle}>
+            Create an account
+          </h1>
           <p className={styles.layoutDesc}>
-            Welcome back! Login to your account to access the portal.
+            Welcome to the MIT Innovation Centre! Create an account to access the portal.
           </p>
         </div>
-        {children}
-      </div>
+        {children}</div>
     </>
   );
 };

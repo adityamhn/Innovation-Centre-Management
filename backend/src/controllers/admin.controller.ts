@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import sanitizeHtml from "sanitize-html";
 import { emailRegex } from "../utils/constants";
-import { MatchPassword, getUserFromEmail } from "../services/user.db";
+import { MatchPassword, getUserFromEmail } from "../services/user.service";
 
 export const adminLogin = async (req: Request, res: Response) => {
   try {
@@ -37,7 +37,7 @@ export const adminLogin = async (req: Request, res: Response) => {
       });
     }
 
-    const passwordIsValid = await MatchPassword(password, user.password);
+    const passwordIsValid = await MatchPassword(password, user.password, true);
 
     if (!passwordIsValid) {
       return res.status(400).json({
@@ -45,16 +45,16 @@ export const adminLogin = async (req: Request, res: Response) => {
       });
     }
 
-    if (!user.isAdmin) {
+    if (!user.is_admin) {
       return res.status(404).json({
         message: "You are not authorized to access this page!",
         code: "UNAUTHORIZED",
-        });
+      });
     }
 
     // create a session
     req.session.user = {
-      userId: user._id.toString(),
+      userId: user.id.toString(),
     };
 
     const DEPLOYMENT = process.env.DEPLOYMENT;
@@ -72,7 +72,7 @@ export const adminLogin = async (req: Request, res: Response) => {
       message: "Admin logged in successfully!",
       code: "ADMIN_LOGGED_IN",
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
       },
     });

@@ -1,0 +1,38 @@
+@import "../_variables";
+
+.sidebarContainer {
+    width: 250px;
+    position: absolute;
+    top: 0rem;
+    bottom: 0;
+    left: 0;
+    border-right: 1px solid var(--border);
+    padding-top: 4rem;
+    .sidebarItemsContainer {
+        display: flex;
+        flex-direction: column;
+
+        .sidebarItem {
+            color: var(--text-secondary);
+            font-size: nth($fontSize, 3);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding-left: 1.2rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+
+            &:hover {
+            background-color: var(--card-bg);
+
+            }
+        }
+
+        .sidebarItemActive {
+            color: var(--mahe);
+            background-color: var(--card-bg);
+        }
+    }
+}

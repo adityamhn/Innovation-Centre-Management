@@ -14,6 +14,7 @@ services:
       - ${POSTGRESDB_LOCAL_PORT}:${POSTGRESDB_DOCKER_PORT}
     volumes:
       - db:/var/lib/postgres
+      - ./backend/src/db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   # backend:
   #   depends_on:

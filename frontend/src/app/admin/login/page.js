@@ -6,24 +6,23 @@ import formStyles from "@/styles/components/Form.module.scss";
 import { Form, Input, Row, message } from "antd";
 import { emailRegex } from "@/services/constants";
 import PrimaryButton from "@/components/common/PrimaryButton";
-import Link from "next/link";
+import { sendAdminLoginRequest } from "@/services/admin.services";
+import { useMutation } from "react-query";
+import { loginUser } from "@/store/user.slice";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { useMutation } from "react-query";
-import { userLoginRequest } from "@/services/auth.service";
-import { loginUser } from "@/store/user.slice";
 
 const Login = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const userLoginMutation = useMutation(userLoginRequest, {
+
+  const adminLoginMutation = useMutation(sendAdminLoginRequest, {
     onSuccess: (data) => {
+      messageApi.success("Login successful!");
       dispatch(loginUser(data.user));
-      messageApi.success("Login successful! Redirecting...", 4, () => {
-        router.push(`/dashboard`);
-      });
+      router.push(`/admin/dashboard`);
     },
     onError: (error) => {
       messageApi.error(
@@ -33,7 +32,7 @@ const Login = () => {
   });
 
   const handleLogin = async (values) => {
-    await userLoginMutation.mutateAsync({
+    await adminLoginMutation.mutateAsync({
       email: values.email,
       password: values.password,
     });
@@ -78,36 +77,19 @@ const Login = () => {
               },
             ]}
           >
-            <Row align="middle">
-              <Input.Password
-                className={`${formStyles.formInput}  ${styles.authEmailInput}`}
-                placeholder="Enter your password"
-              />
-              <PrimaryButton
-                className={`${styles.loginButton}`}
-                buttonType="text"
-              >
-                forgot password?
-              </PrimaryButton>
-            </Row>
+            <Input.Password
+              className={`${formStyles.formInput}  ${styles.authEmailInput}`}
+              placeholder="Enter your password"
+            />
           </Form.Item>
 
           <Row>
             <PrimaryButton
               className={`${formStyles.formButton} ${styles.loginButton}`}
               htmlType="submit"
-              loading={userLoginMutation.isLoading}
             >
               Login
             </PrimaryButton>
-            <Link href="/register">
-              <PrimaryButton
-                className={`${formStyles.formButton} ${styles.loginButton}`}
-                buttonType="text"
-              >
-                create new account
-              </PrimaryButton>
-            </Link>
           </Row>
         </Form>
       </div>
