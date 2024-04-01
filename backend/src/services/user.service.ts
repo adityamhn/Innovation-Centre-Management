@@ -47,3 +47,37 @@ export const createNewUser = async ({
 
   return res.rows[0];
 };
+
+export const registerNewStartup = async ({
+  name,
+  description,
+  pitch_deck_url,
+  pitch_video_url,
+  logo_url,
+  industries,
+  userId,
+}: any) => {
+  const res = await pool.query(
+    "INSERT INTO startups (name, description, pitch_deck_url, pitch_video_url, logo_url, industry, startup_admin) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    [
+      name,
+      description,
+      pitch_deck_url,
+      pitch_video_url,
+      logo_url,
+      industries,
+      userId,
+    ]
+  );
+
+  return res.rows[0];
+};
+
+export const getUserStartup = async (userId: string) => {
+  const res = await pool.query(
+    "SELECT * FROM startups WHERE startup_admin = $1",
+    [userId]
+  );
+
+  return res.rows[0];
+};

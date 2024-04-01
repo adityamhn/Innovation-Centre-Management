@@ -28,11 +28,12 @@
     position: relative;
     min-height: calc(100vh - 126px);
 
-    .layoutContent {
-        max-width: 44rem;
+    .dashboardLayoutContent {
+        max-width: 40rem;
         margin: 0 auto;
         padding: 2rem 0;
-
+        padding-left: 250px;
+        
         .layoutTitle {
             font-size: nth($fontSize, 8);
             font-weight: 600;

@@ -12,3 +12,24 @@ CREATE TABLE users (
 );
 
 INSERT INTO users (name, email, password, is_admin, is_mahe) VALUES ('admin', 'admin_ic@manipal.edu', 'admin', TRUE, TRUE);
+
+CREATE TYPE startup_status AS ENUM ('pending', 'approved', 'invalid', 'alumni');
+
+CREATE TABLE startups (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    pitch_deck_url VARCHAR(100),
+    pitch_video_url VARCHAR(100),
+    logo_url VARCHAR(100),
+    startup_admin INT REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    industry VARCHAR[] NOT NULL,
+    status startup_status NOT NULL DEFAULT 'pending'
+);
+
+CREATE TABLE startup_members (
+    startup_id INT REFERENCES startups(id),
+    user_id INT REFERENCES users(id),
+    PRIMARY KEY (startup_id, user_id)
+);

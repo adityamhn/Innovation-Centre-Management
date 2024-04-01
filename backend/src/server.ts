@@ -15,6 +15,7 @@ require("dotenv").config();
 
 import { authRoutes } from "./routes/auth.routes";
 import { adminRoutes } from "./routes/admin.routes";
+import { userRoutes } from "./routes/user.routes";
 
 declare module "express-session" {
   export interface SessionData {
@@ -24,7 +25,6 @@ declare module "express-session" {
 }
 
 const initializeApp = async () => {
-
   const app = express();
 
   const port = process.env.PORT ?? (8080 as number);
@@ -33,7 +33,6 @@ const initializeApp = async () => {
   const SESS_SECRET = process.env.SESS_SECRET;
 
   const redisClient = createClient();
-
 
   app.use(
     express.urlencoded({
@@ -56,7 +55,6 @@ const initializeApp = async () => {
   });
 
   app.use(cookieParser());
-
 
   const localWhitelist = [
     "http://127.0.0.1:8080",
@@ -97,25 +95,24 @@ const initializeApp = async () => {
 
   app.use(cors(corsOptions));
 
-    // @ts-ignore
-    let redisStore = new RedisStore({ client: redisClient });
+  // @ts-ignore
+  let redisStore = new RedisStore({ client: redisClient });
 
-    const sessionConfig = {
-      secret: SESS_SECRET as string,
-      resave: false,
-      name: SESS_NAME as string,
-      saveUninitialized: false,
-      proxy: true,
-      store: redisStore,
-      cookie: {
-        sameSite: true,
-        secure: DEPLOYMENT === "LOCAL" ? false : true,
-        maxAge: 1000 * 60 * 60 * 12,
-      },
-    };
-  
-    app.use(session(sessionConfig));
+  const sessionConfig = {
+    secret: SESS_SECRET as string,
+    resave: false,
+    name: SESS_NAME as string,
+    saveUninitialized: false,
+    proxy: true,
+    store: redisStore,
+    cookie: {
+      sameSite: true,
+      secure: DEPLOYMENT === "LOCAL" ? false : true,
+      maxAge: 1000 * 60 * 60 * 12,
+    },
+  };
 
+  app.use(session(sessionConfig));
 
   app.get("/", (req, res) => {
     res.send("MIT Innovation Centre Management Portal!");
@@ -127,7 +124,8 @@ const initializeApp = async () => {
   // Auth routes
   app.use("/api/auth", authRoutes);
 
-
+  // User routes
+  app.use("/api/user", userRoutes);
 
   app.listen(port, async () => {
     try {
@@ -136,7 +134,7 @@ const initializeApp = async () => {
     } catch (err) {
       console.log(err);
     }
-    
+
     console.log(`Express is listening at http://localhost:${port}`);
   });
 };

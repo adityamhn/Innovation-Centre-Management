@@ -16,7 +16,7 @@ const AdminDashboardLayout = async ({ children }) => {
   );
 
   if ((error && !error?.isLoggedIn) || !data?.isLoggedIn) {
-    return <Redirect to="/login" />;
+    return <Redirect to="/login" logout/>;
   }
 
   return (
@@ -24,10 +24,9 @@ const AdminDashboardLayout = async ({ children }) => {
       <Navbar />
       <div className={styles.dashboardLayoutContainer}>
         <Sidebar />
-        <div className={styles.layoutContent}>
-          <h1 className={styles.layoutTitle}>Dashboard</h1>
-        </div>
+        <div className={styles.dashboardLayoutContent}>
         {children}
+        </div>
       </div>
     </>
   );

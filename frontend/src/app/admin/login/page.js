@@ -17,12 +17,12 @@ const Login = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-
   const adminLoginMutation = useMutation(sendAdminLoginRequest, {
     onSuccess: (data) => {
-      messageApi.success("Login successful!");
       dispatch(loginUser(data.user));
-      router.push(`/admin/dashboard`);
+      messageApi.success("Login successful! Redirecting...", 4, () => {
+        router.push(`/admin/dashboard`);
+      });
     },
     onError: (error) => {
       messageApi.error(
@@ -87,6 +87,7 @@ const Login = () => {
             <PrimaryButton
               className={`${formStyles.formButton} ${styles.loginButton}`}
               htmlType="submit"
+              loading={adminLoginMutation.isLoading}
             >
               Login
             </PrimaryButton>

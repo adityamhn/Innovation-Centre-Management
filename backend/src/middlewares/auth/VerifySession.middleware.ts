@@ -22,6 +22,8 @@ export const verifySession = async (
 
   const user = await getUserFromId(userId);
 
+  console.log(user)
+
   if (!user) {
     return res.status(403).send({ message: "USER_NOT_FOUND" });
   }

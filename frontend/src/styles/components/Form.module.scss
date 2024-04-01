@@ -85,14 +85,14 @@
         }
 
         .formSelectTags {
-            height: 3rem;
-            border: 1px solid var(--input-border-primary);
+            height: 2.3rem;
+            border: 1px solid var(--input-border-secondary);
             background: none;
             border-radius: 4px;
 
             :global {
                 .ant-select-selector {
-                    background: none;
+                    background: var(--input-bg);
                     color: var(--text);
                     border: none;
                     border-radius: 4px;
@@ -130,7 +130,7 @@
 
             :global {
                 .ant-select-selector {
-                    background: none;
+                    background: var(--input-bg);
                     color: var(--text);
                     border: none;
                     border-radius: 4px;
