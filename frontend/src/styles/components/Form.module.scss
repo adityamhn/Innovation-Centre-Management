@@ -11,8 +11,17 @@
         }
     }
 
+    .sectionLabel {
+        color: var(--text);
+        font-size: nth($fontSize, 4);
+        font-weight: 600;
+        margin-top: 4rem;
+    }
+
     .formItem {
         margin-bottom: 1.2rem;
+
+  
 
         :global {
             .ant-form-item-label {

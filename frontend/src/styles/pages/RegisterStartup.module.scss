@@ -25,4 +25,19 @@
             margin-bottom: 2rem;
         }
     }
+
+    .addMemberButton {
+        height: 2.3rem;
+        background: none;
+        color: var(--text-secondary);
+        font-size: nth($fontSize, 2);
+    }
+
+    .memberSection {
+        margin-bottom: 3rem;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
 }

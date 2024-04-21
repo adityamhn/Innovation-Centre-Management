@@ -1,0 +1,77 @@
+@import "../_variables";
+
+
+.tableContainer {
+   
+
+    :global {
+        .ant-table {
+            background: none;
+            color: var(--text);
+
+            .ant-table-container {
+                .ant-table-thead {
+                    .ant-table-cell {
+                        color: var(--text-secondary);
+                        background: none;
+                        font-size: nth($fontSize, 1);
+                        font-weight: 600;
+                        border-bottom: 1px solid var(--border);
+
+                        &::before {
+                            display: none;
+                        }
+                    }
+                }
+
+                .ant-table-tbody {
+                    background: none;
+
+                    .ant-table-placeholder {
+                        background: none !important;
+
+                        .ant-table-cell {
+                            background: none !important;
+
+                            border-bottom: 1px solid var(--border);
+                        }
+                    }
+                    .ant-table-row {
+                        .ant-table-cell {
+                            color: var(--text);
+                            background: none;
+                            font-size: nth($fontSize, 2);
+                            font-weight: 500;
+                            border-bottom: 1px solid var(--border);
+                        }
+
+                        .ant-table-cell-row-hover {
+                            background: var(--active-bg);
+                        }
+                    }
+                    .ant-table-expanded-row {
+                        // .ant-table {
+                        //     background: var(--card-bg);
+
+                        //     .ant-table-cell-row-hover {
+                        //         background: var(--active-bg);
+                        //     }
+                        // }
+
+                        .ant-table-cell {
+                            border-bottom: 1px solid var(--border);
+                        }
+                    }
+                }
+            }
+
+            .ant-table-footer {
+                background: none;
+                color: var(--text);
+                border-top: 1px solid var(--border);
+                padding: 0.2rem 1rem;
+            }
+        }
+    }
+    
+}

@@ -1,7 +1,23 @@
 import { Request, Response } from "express";
 import sanitizeHtml from "sanitize-html";
 import { emailRegex } from "../utils/constants";
-import { MatchPassword, getUserFromEmail } from "../services/user.service";
+import {
+  MatchPassword,
+  getUserFromEmail,
+  getUserFromId,
+  getUserStartup,
+} from "../services/user.service";
+import {
+  createNewWorkspace,
+  getAllStartups,
+  getAllUsers,
+  getAllWorkspaceRequests,
+  getAllWorkspaces,
+  getStartupFromId,
+  getUserStartupMember,
+  updateStartupStatus,
+  updateWorkspace,
+} from "../services/admin.service";
 
 export const adminLogin = async (req: Request, res: Response) => {
   try {
@@ -75,7 +91,7 @@ export const adminLogin = async (req: Request, res: Response) => {
         id: user.id,
         email: user.email,
         is_admin: user.is_admin,
-        name: user.name
+        name: user.name,
       },
     });
   } catch (err) {
@@ -83,3 +99,254 @@ export const adminLogin = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// Startup
+
+export const getStartups = async (req: Request, res: Response) => {
+  try {
+    const startups = await getAllStartups();
+
+    return res.status(200).json({
+      message: "Startups fetched successfully!",
+      code: "STARTUPS_FETCHED",
+      startups,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getStartupData = async (req: Request, res: Response) => {
+  try {
+    const { startupId } = req.params;
+
+    if (!startupId) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const startup = await getStartupFromId(startupId);
+
+    if (!startup) {
+      return res.status(400).json({
+        message: "Startup does not exist!",
+        code: "STARTUP_DOES_NOT_EXIST",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Startup details fetched successfully!",
+      code: "STARTUP_FETCHED",
+      startup,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateStatus = async (req: Request, res: Response) => {
+  try {
+    const { startupId } = req.params;
+    const { status } = req.body;
+
+    if (!startupId || !status) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const startup = await getStartupFromId(startupId);
+
+    if (!startup) {
+      return res.status(400).json({
+        message: "Startup does not exist!",
+        code: "STARTUP_DOES_NOT_EXIST",
+      });
+    }
+
+    const updatedStartup = await updateStartupStatus(startupId, status);
+
+    return res.status(200).json({
+      message: "Startup status updated successfully!",
+      code: "STARTUP_STATUS_UPDATED",
+      startup: updatedStartup,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// User
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await getAllUsers();
+
+    return res.status(200).json({
+      message: "Users fetched successfully!",
+      code: "USERS_FETCHED",
+      users,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getUserData = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const user = await getUserFromId(userId);
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User does not exist!",
+        code: "USER_DOES_NOT_EXIST",
+      });
+    }
+
+    const userStartup = await getUserStartup(userId);
+
+    if (userStartup) {
+      user.startup = {
+        ...userStartup,
+        type: "admin",
+      };
+    }
+
+    const userMembership = await getUserStartupMember(userId);
+
+    if (userMembership) {
+      user.startup = {
+        ...userMembership,
+        type: "member",
+      };
+    }
+
+    return res.status(200).json({
+      message: "User details fetched successfully!",
+      code: "USER_FETCHED",
+      user,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+// Workspace
+export const addNewWorkspace  = async (req: Request, res: Response) => {
+  try {
+    const { name, location, description, size, amenities, available } = req.body;
+
+    if (!name || !location || !description || !size || !amenities) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const workspace = await createNewWorkspace({
+      name,
+      location,
+      description,
+      size,
+      amenities,
+      available,
+    });
+
+    return res.status(200).json({
+      message: "Workspace added successfully!",
+      code: "WORKSPACE_ADDED",
+      workspace,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export const updateWorkspaceDetails  = async (req: Request, res: Response) => {
+  try {
+    const { name, location, description, size, amenities, available, workspaceId } = req.body;
+
+    if (!name || !location || !description || !size || !amenities || !workspaceId) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const workspace = await updateWorkspace({
+      name,
+      location,
+      description,
+      size,
+      amenities,
+      available,
+      workspaceId
+    });
+
+    if (!workspace) {
+      return res.status(400).json({
+        message: "Workspace does not exist!",
+        code: "WORKSPACE_DOES_NOT_EXIST",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Workspace updated successfully!",
+      code: "WORKSPACE_UPDATED",
+      workspace,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export const getWorkspaces = async (req: Request, res: Response) => {
+  try {
+    const workspaces = await getAllWorkspaces();
+
+    return res.status(200).json({
+      message: "Workspaces fetched successfully!",
+      code: "WORKSPACES_FETCHED",
+      workspaces,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+// Workspace requests
+
+export const getWorkspaceRequests = async (req: Request, res: Response) => {
+  try {
+    const workspaceRequests = await getAllWorkspaceRequests();
+
+    return res.status(200).json({
+      message: "Workspace requests fetched successfully!",
+      code: "WORKSPACE_REQUESTS_FETCHED",
+      requests: workspaceRequests,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}

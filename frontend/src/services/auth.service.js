@@ -35,6 +35,19 @@ export const checkUserLoginStatus = async ({ sid }) => {
   return response.data;
 };
 
+export const checkAdminLoginStatus = async ({ sid }) => {
+  const response = await apiClient.get(
+    "/auth/admin/status",
+    sid && {
+      headers: {
+        Cookie: `sid=${sid}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
 export const logoutUser = async () => {
   const response = await apiClient.get("/auth/logout");
   return response.data;

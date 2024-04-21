@@ -5,7 +5,7 @@ import styles from "@/styles/components/Sidebar.module.scss";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const Sidebar = () => {
+const Sidebar = ({ admin }) => {
     const pathname = usePathname();
 
     const userItems = [
@@ -14,15 +14,15 @@ const Sidebar = () => {
             path: "/dashboard"
         },
         {
-            name: "Register my startup",
-            path: "/dashboard/register-startup"
+            name: "Startup",
+            path: "/dashboard/startup"
         },
         {
-            name: "Request workspace",
-            path: "/dashboard/request-workspace"
+            name: "Workspaces",
+            path: "/dashboard/workspace"
         },
         {
-            name: "Request mentorship",
+            name: "Mentorship",
             path: "/dashboard/mentorship"
         },
         {
@@ -31,19 +31,56 @@ const Sidebar = () => {
         }
     ]
 
+    const adminItems = [
+        {
+            name: "Dashboard",
+            path: "/admin/dashboard"
+        },
+        {
+            name: "Users",
+            path: "/admin/dashboard/users"
+        },
+        {
+            name: "Startups",
+            path: "/admin/dashboard/startups"
+        },
+        {
+            name: "Workspaces",
+            path: "/admin/dashboard/workspaces"
+        },
+        {
+            name: "Workspace Requests",
+            path: "/admin/dashboard/workspace-requests"
+        }
+    ]
+
     return (
         <div className={styles.sidebarContainer}>
             <div className={styles.sidebarItemsContainer}>
-                {userItems.map((item, index) => {
-                    return (
-                        <Link href={item.path} key={index} className={`${styles.sidebarItem} ${
-                            item.path === pathname ? styles.sidebarItemActive : ""
-                        }`}>
-                            {item.name}
-                        </Link>
-                    )
-                })
-            }
+                {admin ? (
+                    <>
+                        {adminItems.map((item, index) => {
+                            return (
+                                <Link href={item.path
+                                } key={index} className={`${styles.sidebarItem} ${item.path === pathname ? styles.sidebarItemActive : ""
+                                    }`}>
+                                    {item.name}
+                                </Link>
+                            )
+                        })
+                        }
+                    </>
+                ) : <>
+                    {userItems.map((item, index) => {
+                        return (
+                            <Link href={item.path} key={index} className={`${styles.sidebarItem} ${item.path === pathname ? styles.sidebarItemActive : ""
+                                }`}>
+                                {item.name}
+                            </Link>
+                        )
+                    })}
+                </>
+                }
             </div>
         </div>
     )

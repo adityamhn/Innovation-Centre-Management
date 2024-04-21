@@ -19,7 +19,7 @@ export const userRegister = async (req: Request, res: Response) => {
 
     email = email.toLowerCase();
 
-    if (!email || !password || !name || (!is_mahe && !regno)) {
+    if (!email || !password || !name || (is_mahe && !regno)) {
       return res.status(400).json({
         message: "Invalid payload! Please try again.",
         code: "INVALID_REQUEST",
@@ -158,6 +158,41 @@ export const checkLoginStatus = async (req: Request, res: Response) => {
     const userFound = await getUserFromId(user.userId);
 
     if (!userFound) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    return res.status(200).json({
+      isLoggedIn: true,
+      user: {
+        id: userFound.id,
+        email: userFound.email,
+        name: userFound.name,
+        is_admin: userFound.is_admin,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", isLoggedIn: false });
+  }
+};
+
+export const checkAdminLoginStatus = async (req: Request, res: Response) => {
+  try {
+    const { user } = req.session;
+
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userFound = await getUserFromId(user.userId);
+
+    if (!userFound) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!userFound.is_admin) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
