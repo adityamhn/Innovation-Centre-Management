@@ -15,9 +15,10 @@ export const getStartup = async (id) => {
   return response.data;
 };
 
-export const updateStartupStatus = async ({ startupId, status }) => {
+export const updateStartupStatus = async ({ startupId, status, public_profile }) => {
   const response = await apiClient.post(`/admin/startups/${startupId}/update`, {
     status,
+    public_profile,
   });
   return response.data;
 };
@@ -49,5 +50,28 @@ export const updateWorkspace = async (body) => {
 
 export const getAllWorkspaceRequests = async () => {
   const response = await apiClient.get("/admin/workspace/requests");
+  return response.data;
+}
+
+
+export const changeWorkspaceRequestStatus = async ({ requestId, status }) => {
+  const response = await apiClient.post(`/admin/workspace/requests/${requestId}/update`, {
+    status,
+  });
+  return response.data;
+}
+
+export const allocateWorkspace = async (body) => {
+  const response = await apiClient.post("/admin/workspace/allocate", body);
+  return response.data;
+}
+
+export const getAllWorkspaceAllocations = async () => {
+  const response = await apiClient.get("/admin/workspace/allocations");
+  return response.data;
+}
+
+export const deleteAllocation = async (id) => {
+  const response = await apiClient.post(`/admin/workspace/allocations/${id}/delete`);
   return response.data;
 }

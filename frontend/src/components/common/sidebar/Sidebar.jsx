@@ -51,6 +51,10 @@ const Sidebar = ({ admin }) => {
         {
             name: "Workspace Requests",
             path: "/admin/dashboard/workspace-requests"
+        },
+        {
+            name: "Workspace Allocations",
+            path: "/admin/dashboard/workspace-allocation"
         }
     ]
 

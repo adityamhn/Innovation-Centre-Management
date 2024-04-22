@@ -38,6 +38,11 @@ const WorkspaceRequestsTable = ({ data, setRequestModal }) => {
             key: 'reason',
         },
         {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+        },
+        {
             title: 'From date',
             dataIndex: 'from_date',
             key: 'from_date',

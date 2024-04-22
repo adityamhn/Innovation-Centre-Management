@@ -29,7 +29,7 @@ const StartupPage = ({ params }) => {
 
   const handleUpdateStatus = async () => {
     const status = form.getFieldValue("status");
-    await updateStatusMutation.mutateAsync({ status, startupId });
+    await updateStatusMutation.mutateAsync({ status, startupId, public_profile: form.getFieldValue("public_profile")});
   };
 
   if (isLoading) {
@@ -291,7 +291,7 @@ const StartupPage = ({ params }) => {
             rules={[
               {
                 required: true,
-                message: "Please select the industries your startup is in!",
+                message: "Select the status of the startup!",
               },
             ]}
           >
@@ -302,6 +302,32 @@ const StartupPage = ({ params }) => {
                 { label: "Approved", value: "approved" },
                 { label: "Invalid", value: "invalid" },
                 { label: "Alumni", value: "alumni" },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="public_profile"
+            label="Make Public"
+            className={`${formStyles.formItem} ${styles.formItem}`}
+            rules={[
+              {
+                required: true,
+                message: "Select if the startup is public!",
+              },
+            ]}
+          >
+            <Select
+              className={formStyles.formSelectTags}
+              options={[
+                {
+                  label: "Yes",
+                  value: true,
+                },
+                {
+                  label: "No",
+                  value: false,
+                },
               ]}
             />
           </Form.Item>

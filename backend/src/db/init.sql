@@ -25,7 +25,8 @@ CREATE TABLE startups (
     startup_admin INT REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     industry VARCHAR[] NOT NULL,
-    status startup_status NOT NULL DEFAULT 'pending'
+    status startup_status NOT NULL DEFAULT 'pending',
+    public_profile BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE startup_members (
@@ -49,12 +50,13 @@ CREATE TYPE request_status AS ENUM ('pending', 'approved', 'rejected');
 
 
 CREATE TABLE workspace_allocations (
+    allocation_id SERIAL,
     workspace_id INT REFERENCES workspaces(workspace_id),
-    startup_id INT REFERENCES startups(id),
-    user_id INT REFERENCES users(id),   
     start_date DATE NOT NULL,
+    user_id INT REFERENCES users(id),
+    startup_id INT REFERENCES startups(id),
     end_date DATE,
-    PRIMARY KEY (workspace_id, startup_id, user_id)
+    PRIMARY KEY (workspace_id, user_id)
 );
 
 

@@ -63,12 +63,45 @@ const RequestWorkspace = () => {
             style={{ marginTop: "2rem" }}
           />
         )}
+
+{ data?.request?.status === "approved" && (
+  <>
+          <Alert
+            message="Workspace request approved"
+            description="Your workspace request has been approved. You can now access the workspace."
+            type="success"
+            showIcon
+            style={{ marginTop: "2rem" }}
+          />
+          <Alert
+            message="Workspace will be alloted"
+            description="Please visit the innovation center to get your access to the workspace."
+            type="info"
+            showIcon
+            style={{ marginTop: "1rem" }}
+          />
+  </>
+
+        )}
+
+{ data?.request?.status === "rejected" && (
+          <Alert
+            message="Workspace request rejected"
+            description="Your workspace request has been rejected. Please contact the admin for more details."
+            type="error"
+            showIcon
+            style={{ marginTop: "2rem" }}
+          />
+        )}
+
+
+
         <Form
         //   form={form}
           className={`${formStyles.formContainer} ${styles.registerForm}`}
           layout="vertical"
           onFinish={handleSubmit}
-          disabled={data?.request?.status === "pending"}
+          disabled={data?.request?.status === "pending" || data?.request?.status === "approved"}
           initialValues={{
             workspaceType: data?.request?.workspace_type,
             reason: data?.request?.reason,

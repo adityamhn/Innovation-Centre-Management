@@ -1,5 +1,5 @@
 import express from "express";
-import { addNewWorkspace, adminLogin, getStartupData, getStartups, getUserData, getUsers, getWorkspaceRequests, getWorkspaces, updateStatus, updateWorkspaceDetails } from "../controllers/admin.controller";
+import { addNewWorkspace, adminLogin, changeWorkspaceRequestStatus, getAllAllocations, getStartupData, getStartups, getUserData, getUsers, getWorkspaceRequests, getWorkspaces, removeAllocation, updateStatus, updateWorkspaceDetails, workspaceAllocation } from "../controllers/admin.controller";
 import { verifyAdminSession } from "../middlewares/auth/VerifySession.middleware";
 
 const router = express.Router();
@@ -27,6 +27,15 @@ router.get("/workspace", [verifyAdminSession], getWorkspaces)
 
 // Workspace requests
 router.get("/workspace/requests", [verifyAdminSession], getWorkspaceRequests)
+
+router.post("/workspace/requests/:requestId/update", [verifyAdminSession], changeWorkspaceRequestStatus)
+
+// Workspace Allocation
+router.post("/workspace/allocate", [verifyAdminSession], workspaceAllocation)
+
+router.get("/workspace/allocations", [verifyAdminSession], getAllAllocations)
+
+router.post("/workspace/allocations/:allocationId/delete", [verifyAdminSession], removeAllocation)
 
 
 export { router as adminRoutes };

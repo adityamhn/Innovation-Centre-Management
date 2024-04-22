@@ -121,10 +121,36 @@ export const addMemberToStartup = async ({
   return res.rows[0];
 };
 
+export const deleteAllMembersFromStartup = async (startupId: string) => {
+  const res = await pool.query(
+    "DELETE FROM startup_members WHERE startup_id = $1",
+    [startupId]
+  );
+
+  return res.rows;
+}
+
 export const getUserStartup = async (userId: string) => {
   const res = await pool.query(
     "SELECT * FROM startups WHERE startup_admin = $1",
     [userId]
+  );
+
+  return res.rows[0];
+};
+
+export const updateStartup = async ({
+  name,
+  description,
+  pitch_deck_url,
+  pitch_video_url,
+  logo_url,
+  industries,
+  startupId,
+}: any) => {
+  const res = await pool.query(
+    "UPDATE startups SET name = $1, description = $2, pitch_deck_url = $3, pitch_video_url = $4, logo_url = $5, industry = $6 WHERE id = $7 RETURNING *",
+    [name, description, pitch_deck_url, pitch_video_url, logo_url, industries, startupId]
   );
 
   return res.rows[0];
@@ -169,12 +195,19 @@ export const requestForWorkspace = async ({
   return res.rows[0];
 };
 
-
 export const getUserPendingWorkspaceRequests = async (userId: string) => {
   const res = await pool.query(
-    "SELECT * FROM workspace_requests WHERE requester_id = $1 AND status = 'pending'",
+    "SELECT * FROM workspace_requests WHERE requester_id = $1",
     [userId]
   );
 
   return res.rows[0];
-}
+};
+
+export const getAllPublicStartups = async () => {
+  const res = await pool.query(
+    "SELECT name, id, description, logo_url, industry, public_profile FROM startups WHERE public_profile = true"
+  );
+
+  return res.rows;
+};

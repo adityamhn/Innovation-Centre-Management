@@ -1,17 +1,19 @@
-import { DatePicker, Form, Input, InputNumber, Modal, Row, Select, message } from 'antd'
+import { Form, Modal, Row, Select, message } from 'antd'
 import React, { useEffect } from 'react'
 import PrimaryButton from '../../PrimaryButton';
 import styles from "@/styles/components/Modal.module.scss"
 import formStyles from "@/styles/components/Form.module.scss";
-import dayjs from 'dayjs';
 import Link from 'next/link';
 import moment from 'moment';
+import { useMutation, useQueryClient } from 'react-query';
+import { changeWorkspaceRequestStatus } from '@/services/admin.services';
 
 const WorkspaceRequestModal = ({
     visible,
     setVisible,
 }) => {
     const [form] = Form.useForm();
+    const queryClient = useQueryClient();
     const [messageApi, contextHolder] = message.useMessage();
 
     console.log(visible)
@@ -22,12 +24,29 @@ const WorkspaceRequestModal = ({
         setVisible(false)
     }
 
+    const changeStatusMutation = useMutation(changeWorkspaceRequestStatus, {
+        onSuccess: async () => {
+            messageApi.success("Status updated successfully");
+            await queryClient.invalidateQueries("all-requests");
+            closeModal();
+        },
+        onError: (error) => {
+            messageApi.error("Something went wrong. Please try again.");
+        },
+    });
 
+    const handleStatusChange = async (values) => {
+        await changeStatusMutation.mutateAsync({
+            requestId: visible.request_id,
+            status: values.status
+        });
+    
+    }
 
     useEffect(() => {
-            form.setFieldsValue({
-                status: visible?.status
-            })
+        form.setFieldsValue({
+            status: visible?.status
+        })
     }, [visible, form])
 
 
@@ -53,7 +72,8 @@ const WorkspaceRequestModal = ({
                         form={form}
                         className={`${formStyles.formContainer} ${styles.modalForm}`}
                         layout='vertical'
-                        
+                        onFinish={handleStatusChange}
+
                     >
                         <Form.Item
                             label="Requester Name"
@@ -131,7 +151,7 @@ const WorkspaceRequestModal = ({
                                         label: 'Pending',
                                         value: 'pending'
                                     }
-                                
+
                                 ]}
                             />
                         </Form.Item>
@@ -148,7 +168,7 @@ const WorkspaceRequestModal = ({
                                 size="small"
                                 className={`${styles.formButton} ${styles.modalButton}`}
                                 htmlType='submit'
-                            // loading={addWorkspaceMutation.isLoading || updateWorkspaceMutation.isLoading}
+                            loading={handleStatusChange.isLoading}
                             >Update Status</PrimaryButton>
                         </Row>
                     </Form>

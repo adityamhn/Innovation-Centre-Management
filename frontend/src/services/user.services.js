@@ -10,6 +10,17 @@ export const getStartup = async () => {
   return response.data;
 };
 
+export const updateStartup = async (body) => {
+  const response = await apiClient.post("/user/startup/update", body);
+  return response.data;
+}
+
+export const getPublicStartups = async () => {
+  const response = await apiClient.get("/user/startup/public");
+  return response.data;
+};
+
+
 export const getUserProfile = async () => {
   const response = await apiClient.get("/user/profile");
   return response.data;

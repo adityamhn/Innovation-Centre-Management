@@ -1,3 +1,4 @@
+import e from "express";
 import { pool } from "../db/db";
 import { getStartupMembers, getUserFromId } from "./user.service";
 
@@ -54,6 +55,18 @@ export const updateStartupStatus = async (
 
   return res.rows[0];
 };
+
+export const updateStartupPublic = async (
+  startupId: string,
+  isPublic: boolean
+) => {
+  const res = await pool.query(
+    "UPDATE startups SET public_profile = $1 WHERE id = $2",
+    [isPublic ? "true" : "false", startupId]
+  );
+
+  return res.rows[0];
+}
 
 export const getAllUsers = async () => {
   const res = await pool.query("SELECT * FROM users");
@@ -143,14 +156,92 @@ export const getAllWorkspaces = async () => {
   return res.rows;
 };
 
-export const getAllWorkspaceRequests = async () => {
-    const res = await pool.query("SELECT * FROM workspace_requests");
+export const getWorkspaceFromId = async (workspaceId: string) => {
+  const res = await pool.query("SELECT * FROM workspaces WHERE workspace_id = $1", [
+    workspaceId,
+  ]);
 
-    for (const request of res.rows) {
-        const user = await getUserFromId(request.requester_id);
-        request.user = user;
-    }
-
-    return res.rows;
+  return res.rows[0];
 }
 
+export const getAllWorkspaceRequests = async () => {
+  const res = await pool.query("SELECT * FROM workspace_requests");
+
+  for (const request of res.rows) {
+    const user = await getUserFromId(request.requester_id);
+    request.user = user;
+  }
+
+  return res.rows;
+};
+
+export const updateWorkspaceRequestStatus = async (
+  requestId: string,
+  status: string
+) => {
+  const res = await pool.query(
+    "UPDATE workspace_requests SET status = $1 WHERE request_id = $2",
+    [status, requestId]
+  );
+
+  return res.rows[0];
+};
+
+export const allocateWorkspace = async ({
+  workspaceId,
+  userId,
+  startupId,
+  startDate,
+  endDate,
+}: {
+  workspaceId: string;
+  userId: string;
+  startupId: string;
+  startDate: any;
+  endDate: Date;
+}) => {
+  let res;
+
+  if (!startDate) {
+    throw new Error("Start and end date are required");
+  }
+
+  if (startupId) {
+    res = await pool.query(
+      "INSERT INTO workspace_allocations (workspace_id, start_date, user_id, startup_id, end_date) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [workspaceId, startDate, userId, startupId, endDate]
+    );
+  } else {
+    res = await pool.query(
+      "INSERT INTO workspace_allocations (workspace_id, start_date, user_id, end_date) VALUES ($1, $2, $3, $4) RETURNING *",
+      [workspaceId, startDate, userId, endDate]
+    );
+  }
+
+  return res.rows[0];
+};
+
+export const getWorkspaceAllocations = async () => {
+  const res = await pool.query("SELECT * FROM workspace_allocations");
+
+  for (const allocation of res.rows) {
+    const user = await getUserFromId(allocation.user_id);
+    allocation.user = user;
+
+    if (allocation.startup_id) {
+      const startup = await getStartupFromId(allocation.startup_id);
+      allocation.startup = startup;
+    }
+
+    const workspace = await getWorkspaceFromId(allocation.workspace_id);
+    allocation.workspace = workspace;
+  }
+
+  return res.rows;
+}
+
+export const deleteAllocation = async (allocationId: string) => {
+  const res = await pool.query("DELETE FROM workspace_allocations WHERE allocation_id = $1", [allocationId]);
+
+  return res.rows[0];
+}

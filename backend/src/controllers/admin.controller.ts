@@ -8,15 +8,21 @@ import {
   getUserStartup,
 } from "../services/user.service";
 import {
+  allocateWorkspace,
   createNewWorkspace,
+  deleteAllocation,
   getAllStartups,
   getAllUsers,
   getAllWorkspaceRequests,
   getAllWorkspaces,
   getStartupFromId,
   getUserStartupMember,
+  getWorkspaceAllocations,
+  getWorkspaceFromId,
+  updateStartupPublic,
   updateStartupStatus,
   updateWorkspace,
+  updateWorkspaceRequestStatus,
 } from "../services/admin.service";
 
 export const adminLogin = async (req: Request, res: Response) => {
@@ -151,7 +157,7 @@ export const getStartupData = async (req: Request, res: Response) => {
 export const updateStatus = async (req: Request, res: Response) => {
   try {
     const { startupId } = req.params;
-    const { status } = req.body;
+    const { status, public_profile } = req.body;
 
     if (!startupId || !status) {
       return res.status(400).json({
@@ -169,7 +175,8 @@ export const updateStatus = async (req: Request, res: Response) => {
       });
     }
 
-    const updatedStartup = await updateStartupStatus(startupId, status);
+    let updatedStartup = await updateStartupStatus(startupId, status);
+    updatedStartup = await updateStartupPublic(startupId, public_profile);
 
     return res.status(200).json({
       message: "Startup status updated successfully!",
@@ -247,11 +254,11 @@ export const getUserData = async (req: Request, res: Response) => {
   }
 };
 
-
 // Workspace
-export const addNewWorkspace  = async (req: Request, res: Response) => {
+export const addNewWorkspace = async (req: Request, res: Response) => {
   try {
-    const { name, location, description, size, amenities, available } = req.body;
+    const { name, location, description, size, amenities, available } =
+      req.body;
 
     if (!name || !location || !description || !size || !amenities) {
       return res.status(400).json({
@@ -278,13 +285,28 @@ export const addNewWorkspace  = async (req: Request, res: Response) => {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
-}
+};
 
-export const updateWorkspaceDetails  = async (req: Request, res: Response) => {
+export const updateWorkspaceDetails = async (req: Request, res: Response) => {
   try {
-    const { name, location, description, size, amenities, available, workspaceId } = req.body;
+    const {
+      name,
+      location,
+      description,
+      size,
+      amenities,
+      available,
+      workspaceId,
+    } = req.body;
 
-    if (!name || !location || !description || !size || !amenities || !workspaceId) {
+    if (
+      !name ||
+      !location ||
+      !description ||
+      !size ||
+      !amenities ||
+      !workspaceId
+    ) {
       return res.status(400).json({
         message: "Invalid request! Please try again.",
         code: "INVALID_REQUEST",
@@ -298,7 +320,7 @@ export const updateWorkspaceDetails  = async (req: Request, res: Response) => {
       size,
       amenities,
       available,
-      workspaceId
+      workspaceId,
     });
 
     if (!workspace) {
@@ -317,7 +339,7 @@ export const updateWorkspaceDetails  = async (req: Request, res: Response) => {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
-}
+};
 
 export const getWorkspaces = async (req: Request, res: Response) => {
   try {
@@ -332,7 +354,7 @@ export const getWorkspaces = async (req: Request, res: Response) => {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
-}
+};
 
 // Workspace requests
 
@@ -349,4 +371,122 @@ export const getWorkspaceRequests = async (req: Request, res: Response) => {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
-}
+};
+
+export const changeWorkspaceRequestStatus = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { requestId } = req.params;
+    const { status } = req.body;
+
+    if (!requestId || !status) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const workspaceRequest = await updateWorkspaceRequestStatus(
+      requestId,
+      status
+    );
+
+    return res.status(200).json({
+      message: "Workspace request status updated successfully!",
+      code: "WORKSPACE_REQUEST_STATUS_UPDATED",
+      request: workspaceRequest,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Workspace allocations
+export const workspaceAllocation = async (req: Request, res: Response) => {
+  try {
+    const { workspace_id, startupId, users, start_date, end_date } = req.body;
+
+    if (!workspace_id) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+    const workspace = await getWorkspaceFromId(workspace_id);
+
+    if (!workspace) {
+      return res.status(400).json({
+        message: "Workspace does not exist!",
+        code: "WORKSPACE_DOES_NOT_EXIST",
+      });
+    }
+
+    for (const userId of users) {
+      const user = await getUserFromId(userId);
+
+      if (!user) {
+        return res.status(400).json({
+          message: "User does not exist!",
+          code: "USER_DOES_NOT_EXIST",
+        });
+      }
+
+      await allocateWorkspace({
+        workspaceId: workspace_id,
+        userId,
+        startupId: startupId || null,
+        startDate: start_date,
+        endDate: end_date,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Workspace allocated successfully!",
+      code: "WORKSPACE_ALLOCATED",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getAllAllocations = async (req: Request, res: Response) => {
+  try {
+    const allocations = await getWorkspaceAllocations();
+
+    return res.status(200).json({
+      message: "Workspace allocations fetched successfully!",
+      code: "WORKSPACE_ALLOCATIONS_FETCHED",
+      allocations,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const removeAllocation = async (req: Request, res: Response) => {
+  try {
+    const { allocationId } = req.params;
+
+    if (!allocationId) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const allocation = await deleteAllocation(allocationId);
+
+    return res.status(200).json({
+      message: "Allocation deleted successfully!",
+      code: "ALLOCATION_DELETED",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};

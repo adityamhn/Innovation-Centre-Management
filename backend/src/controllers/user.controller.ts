@@ -1,14 +1,19 @@
 import { Request, Response } from "express";
 import {
   addMemberToStartup,
+  deleteAllMembersFromStartup,
+  getAllPublicStartups,
   getStartupMembers,
+  getUserFromEmail,
   getUserFromId,
   getUserPendingWorkspaceRequests,
   getUserStartup,
   registerNewStartup,
   requestForWorkspace,
+  updateStartup,
   updateUserProfile,
 } from "../services/user.service";
+import { getStartupFromId } from "../services/admin.service";
 
 export const registerStartup = async (req: Request, res: Response) => {
   try {
@@ -112,6 +117,107 @@ export const getStartupDetails = async (req: Request, res: Response) => {
       message: "Startup details fetched successfully!",
       code: "STARTUP_FETCHED",
       startup,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateStartupProfile = async (req: Request, res: Response) => {
+  try {
+    const { userId } = res.locals;
+
+    const user = await getUserFromId(userId);
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User does not exist!",
+        code: "USER_DOES_NOT_EXIST",
+      });
+    }
+
+    const startupId = req.body.startup_id;
+
+    if (!startupId) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const startup = await getStartupFromId(startupId);
+
+    if (!startup) {
+      return res.status(400).json({
+        message: "Startup does not exist!",
+        code: "STARTUP_DOES_NOT_EXIST",
+      });
+    }
+
+    let {
+      name,
+      description,
+      pitch_deck_url,
+      pitch_video_url,
+      logo_url,
+      industries,
+      members,
+    } = req.body;
+
+    if (
+      !name ||
+      !description ||
+      !pitch_deck_url ||
+      !pitch_video_url ||
+      !logo_url ||
+      !industries
+    ) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const updatedStartup = await updateStartup({
+      name,
+      description,
+      pitch_deck_url,
+      pitch_video_url,
+      logo_url,
+      industries,
+      startupId: startup.id,
+    });
+
+    // check if members exist
+    if (members && members.length > 0) {
+      for (const member of members) {
+        const user = await getUserFromEmail(member.email);
+        if (!user) {
+          return res.status(400).json({
+            message: `Member ${member.email} does not exist!`,
+            code: "MEMBER_DOES_NOT_EXIST",
+          });
+        }
+      }
+    }
+
+    // delete all members
+    await deleteAllMembersFromStartup(startup.id);
+
+    // add new members
+    for (const member of members) {
+      await addMemberToStartup({
+        startupId: startup.id,
+        email: member.email,
+        role: member.role,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Startup profile updated successfully!",
+      code: "STARTUP_PROFILE_UPDATED",
+      startup: updatedStartup,
     });
   } catch (err) {
     console.log(err);
@@ -247,4 +353,20 @@ export const getMyWorkspaceRequest = async (req: Request, res: Response) => {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
-}
+};
+
+// Startups
+export const getPublicStartups = async (req: Request, res: Response) => {
+  try {
+    const startups = await getAllPublicStartups();
+
+    return res.status(200).json({
+      message: "Startups fetched successfully!",
+      code: "STARTUPS_FETCHED",
+      startups,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};

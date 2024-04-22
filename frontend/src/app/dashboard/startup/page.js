@@ -6,7 +6,11 @@ import { Alert, Form, Input, Row, Select, Space, message } from "antd";
 import formStyles from "@/styles/components/Form.module.scss";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { getStartup, registerStartupRequest } from "@/services/user.services";
+import {
+  getStartup,
+  registerStartupRequest,
+  updateStartup,
+} from "@/services/user.services";
 import LoaderPage from "@/components/common/Loader/LoaderPage";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 
@@ -44,7 +48,33 @@ const RegisterStartup = () => {
     },
   });
 
+  const updateStartupMutation = useMutation(updateStartup, {
+    onSuccess: async (data) => {
+      messageApi.success("Startup updated successfully!");
+
+      await queryClient.invalidateQueries("get-startup");
+    },
+    onError: (error) => {
+      messageApi.error(
+        error?.response?.data?.message || "Something went wrong"
+      );
+    },
+  });
+
   const handleRegisterStartup = async (values) => {
+    if (data?.startup?.id) {
+      await updateStartupMutation.mutateAsync({
+        startup_id: data.startup.id,
+        name: values.name,
+        description: values.description,
+        pitch_deck_url: values.pitch_deck_url,
+        pitch_video_url: values.pitch_video_url,
+        logo_url: values.logo_url,
+        industries: values.industries,
+        members: values.members,
+      });
+      return;
+    }
     await registerStartupMutation.mutateAsync({
       name: values.name,
       description: values.description,
@@ -95,7 +125,7 @@ const RegisterStartup = () => {
             style={{ marginTop: "2rem" }}
           />
         )}
-         {data?.startup?.status === "alumini" && (
+        {data?.startup?.status === "alumini" && (
           <Alert
             message="Startup is alumini"
             description="Your startup is alumini of MIT Innovation centre. "
@@ -310,25 +340,16 @@ const RegisterStartup = () => {
           </Form.List>
 
           <Row>
-            {!data?.startup ? (
-              <PrimaryButton
-                className={`${formStyles.formButton} ${styles.loginButton}`}
-                htmlType="submit"
-                loading={registerStartupMutation.isLoading}
-              >
-                Register startup
-              </PrimaryButton>
-            ) : (
-              <>
-              {(data?.startup.status === "pending" || data?.startup.status === "approved" || data?.startup.status === "invalid") && (
-                <PrimaryButton
-                  className={`${formStyles.formButton} ${styles.loginButton}`}
-                >
-                  Update startup
-                </PrimaryButton>
-              )}
-              </>
-            )}
+            <PrimaryButton
+              className={`${formStyles.formButton} ${styles.loginButton}`}
+              htmlType="submit"
+              loading={
+                registerStartupMutation.isLoading ||
+                updateStartupMutation.isLoading
+              }
+            >
+              {data?.startup ? "Update startup" : "Register startup"}
+            </PrimaryButton>
           </Row>
         </Form>
       </div>
