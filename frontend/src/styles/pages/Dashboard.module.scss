@@ -1,0 +1,84 @@
+@import "../_variables";
+
+.dashboardContainer {
+    .dashboardHeader {
+        .heading {
+            font-size: nth($fontSize, 8);
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .type {
+            font-size: nth($fontSize, 1);
+            color: var(--text-600);
+        }
+    }
+
+    .contents {
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+.dashboardCardContainer {
+    :global {
+        .ant-card-body {
+            padding: 1rem;
+        }
+    }
+
+    .dashboardCardHeader {
+        gap: 10px;
+
+        .avatar {
+        }
+
+        .headerPerson {
+            font-size: nth($fontSize, 2);
+            font-weight: 500;
+            margin-bottom: 0;
+            color: var(--mahe);
+
+        }
+    }
+
+    .dashboardCardContent {
+        margin-top: 1.2rem;
+
+        .title {
+            font-size: nth($fontSize, 4);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .description {
+            font-size: nth($fontSize, 2);
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 1rem
+        }
+
+        .date {
+            font-size: nth($fontSize, 2);
+            font-weight: 500;
+            color: var(--text-600);
+            margin-bottom: 1rem;
+
+            span {
+                color: var(--text-secondary);
+                font-weight: 600;
+            }
+        }
+    }
+
+    .dashboardCardFooter {
+        margin-top: 0.6rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: nth($fontSize, 1);
+        color: var(--text-600);
+    }
+}

@@ -91,9 +91,10 @@ CREATE TABLE update_comments (
 
 CREATE TABLE mentorship_requests (
     request_id SERIAL PRIMARY KEY,
-    startup_id INT REFERENCES startups(id),
-    mentor_id INT REFERENCES users(id),
+    area_of_interest TEXT NOT NULL,
+    available_days TEXT NOT NULL,
     request_details TEXT,
+    user_id INT REFERENCES users(id),
     status request_status DEFAULT 'pending',
     requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -113,7 +114,7 @@ CREATE TABLE events (
     event_date TIMESTAMP,
     location VARCHAR(255),
     created_by INT REFERENCES users(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE news (
@@ -130,3 +131,53 @@ CREATE TABLE investment_opportunities (
     visibility BOOLEAN DEFAULT TRUE,
     posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE OR REPLACE FUNCTION get_startup_stats()
+RETURNS TABLE(
+    total_users INT,
+    total_approved_startups INT,
+    total_alumni_startups INT,
+    total_workspaces INT,
+    total_pending_startups INT,
+    total_invalid_startups INT,
+    total_pending_workspace_requests INT,
+    total_pending_mentorship_requests INT
+) AS $$
+BEGIN
+    -- Count total users
+    SELECT COUNT(*) INTO total_users FROM users;
+
+    -- Count total approved startups
+    SELECT COUNT(*) INTO total_approved_startups FROM startups
+    WHERE status = 'approved';
+
+    -- Count total alumni startups
+    SELECT COUNT(*) INTO total_alumni_startups FROM startups
+    WHERE status = 'alumni';
+
+    -- Count total workspaces
+    SELECT COUNT(*) INTO total_workspaces FROM workspaces;
+
+    -- Count total pending startups
+    SELECT COUNT(*) INTO total_pending_startups FROM startups
+    WHERE status = 'pending';
+
+    -- Count total invalid startups
+    SELECT COUNT(*) INTO total_invalid_startups FROM startups
+    WHERE status = 'invalid';
+
+    -- Count total pending workspace requests
+    SELECT COUNT(*) INTO total_pending_workspace_requests FROM workspace_requests
+    WHERE status = 'pending';
+
+    -- Count total pending mentorship requests
+    SELECT COUNT(*) INTO total_pending_mentorship_requests FROM mentorship_requests
+    WHERE status = 'pending';
+
+    -- Return all counts
+    RETURN QUERY SELECT total_users, total_approved_startups, total_alumni_startups, total_workspaces,
+                    total_pending_startups, total_invalid_startups, total_pending_workspace_requests,
+                    total_pending_mentorship_requests;
+END;
+$$ LANGUAGE plpgsql;

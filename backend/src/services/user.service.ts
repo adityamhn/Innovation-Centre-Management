@@ -1,6 +1,7 @@
 import moment from "moment";
 import { pool } from "../db/db";
 import bcrypt from "bcryptjs";
+import { getWorkspaceFromId } from "./admin.service";
 
 export const getUserFromEmail = async (email: string) => {
   const res = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -211,3 +212,108 @@ export const getAllPublicStartups = async () => {
 
   return res.rows;
 };
+
+export const getMyAllocatedWorkspace = async (userId: string) => {  
+  const res = await pool.query(
+    "SELECT * FROM workspace_allocations WHERE user_id = $1",
+    [userId]
+  );
+
+  const allocation = res.rows[0];
+
+  if (allocation.workspace_id) {
+    const workspace = await getWorkspaceFromId(allocation.workspace_id);
+    allocation.workspace = workspace;
+  }
+
+  return allocation;
+
+}
+
+// CREATE TABLE mentorship_requests (
+//   request_id SERIAL PRIMARY KEY,
+//   area_of_interest TEXT NOT NULL,
+//   available_days TEXT NOT NULL,
+//   request_details TEXT,
+//   user_id INT REFERENCES users(id),
+//   status request_status DEFAULT 'pending',
+//   requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+// );
+
+export const requestMentorship = async ({
+  area_of_interest,
+  available_days,
+  request_details,
+  userId,
+}: {
+  area_of_interest: string;
+  available_days: string;
+  request_details: string;
+  userId: string;
+}) => {
+  const res = await pool.query(
+    "INSERT INTO mentorship_requests (area_of_interest, available_days, request_details, user_id) VALUES ($1, $2, $3, $4) RETURNING *",
+    [area_of_interest, available_days, request_details, userId]
+  );
+
+  return res.rows[0];
+}
+
+
+// CREATE TABLE events (
+//   event_id SERIAL PRIMARY KEY,
+//   title VARCHAR(255) NOT NULL,
+//   description TEXT,
+//   event_date TIMESTAMP,
+//   location VARCHAR(255),
+//   created_by INT REFERENCES users(id),
+//   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+// );
+
+// CREATE TABLE news (
+//   news_id SERIAL PRIMARY KEY,
+//   title VARCHAR(255) NOT NULL,
+//   content TEXT NOT NULL,
+//   posted_by INT REFERENCES users(id),
+//   posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+// );
+
+// CREATE TABLE investment_opportunities (
+//   opportunity_id SERIAL PRIMARY KEY,
+//   opportunity_details TEXT NOT NULL,
+//   visibility BOOLEAN DEFAULT TRUE,
+//   posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+// );
+
+
+export const getAllInfo = async () => {
+  // get all news, events, opportunities in single array with type
+  const news = await pool.query("SELECT * FROM news");
+  const events = await pool.query("SELECT * FROM events");
+  const opportunities = await pool.query("SELECT * FROM investment_opportunities WHERE visibility = true");
+
+  const final = [];
+
+  for (const item of news.rows) {
+    item.type = "news";
+    final.push(item);
+  }
+
+  for (const item of events.rows) {
+    item.type = "event";
+    final.push(item);
+  }
+
+  for (const item of opportunities.rows) {
+    item.type = "opportunity";
+    final.push(item);
+  }
+
+  // sort by posted_at in descending order
+  final.sort((a, b) => {
+    return moment(b.posted_at).diff(moment(a.posted_at));
+  });
+
+
+  return final;
+}

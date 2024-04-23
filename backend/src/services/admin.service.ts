@@ -245,3 +245,97 @@ export const deleteAllocation = async (allocationId: string) => {
 
   return res.rows[0];
 }
+
+
+export const createEvent = async ({
+  title,
+  description,
+  eventDate,
+  location,
+  createdBy,
+}: {
+  title: string;
+  description: string;
+  eventDate: any;
+  location: string;
+  createdBy: string;
+}) => {
+  const res = await pool.query(
+    "INSERT INTO events (title, description, event_date, location, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+    [title, description, eventDate, location, createdBy]
+  );
+
+  return res.rows[0];
+}
+
+export const getAllEvents = async () => {
+  const res = await pool.query("SELECT * FROM events");
+
+  for (const event of res.rows) {
+    const user = await getUserFromId(event.created_by);
+    event.created_by = user;
+  }
+
+  return res.rows;
+}
+
+export const createNews = async ({
+  title,
+  content,
+  postedBy,
+}: {
+  title: string;
+  content: string;
+  postedBy: string;
+}) => {
+  const res = await pool.query(
+    "INSERT INTO news (title, content, posted_by) VALUES ($1, $2, $3) RETURNING *",
+    [title, content, postedBy]
+  );
+
+  return res.rows[0];
+}
+
+
+export const getAllNews = async () => {
+  const res = await pool.query("SELECT * FROM news");
+
+  for (const news of res.rows) {
+    const user = await getUserFromId(news.posted_by);
+    news.posted_by = user;
+  }
+
+  return res.rows;
+}
+
+export const createInvestmentOpportunity = async ({
+  opportunityDetails,
+  visibility = true,
+}: {
+  opportunityDetails: string;
+  visibility: any;
+}) => {
+  const res = await pool.query(
+    "INSERT INTO investment_opportunities (opportunity_details, visibility) VALUES ($1, $2) RETURNING *",
+    [opportunityDetails, visibility]
+  );
+
+  return res.rows[0];
+}
+
+export const getAllInvestmentOpportunities = async () => {
+  const res = await pool.query("SELECT * FROM investment_opportunities");
+
+  return res.rows;
+}
+
+
+export const getStartupStats = async () => {
+  try {
+    const res = await pool.query("SELECT * FROM get_startup_stats();");
+    return res.rows[0];  // Assuming the function always returns one row
+  } catch (error) {
+    console.error('Error executing get_startup_stats:', error);
+    throw error;
+  }
+}

@@ -9,13 +9,17 @@ import {
 } from "../services/user.service";
 import {
   allocateWorkspace,
+  createEvent,
+  createInvestmentOpportunity,
   createNewWorkspace,
+  createNews,
   deleteAllocation,
   getAllStartups,
   getAllUsers,
   getAllWorkspaceRequests,
   getAllWorkspaces,
   getStartupFromId,
+  getStartupStats,
   getUserStartupMember,
   getWorkspaceAllocations,
   getWorkspaceFromId,
@@ -484,6 +488,105 @@ export const removeAllocation = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Allocation deleted successfully!",
       code: "ALLOCATION_DELETED",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// News
+export const addInformation = async (req: Request, res: Response) => {
+  try {
+    const { userId } = res.locals;
+
+    const { type } = req.body;
+
+    if (type === "news") {
+      const { title, content } = req.body;
+
+      if (!title || !content) {
+        return res.status(400).json({
+          message: "Invalid request! Please try again.",
+          code: "INVALID_REQUEST",
+        });
+      }
+
+      const news = await createNews({
+        title,
+        content,
+        postedBy: userId,
+      });
+
+      return res.status(200).json({
+        message: "News created successfully!",
+        code: "NEWS_CREATED",
+        news,
+      });
+    } else if (type === "event") {
+      const { title, description, eventDate, location } = req.body;
+
+      if (!title || !description || !eventDate || !location) {
+        return res.status(400).json({
+          message: "Invalid request! Please try again.",
+          code: "INVALID_REQUEST",
+        });
+      }
+
+      const event = await createEvent({
+        title,
+        description,
+        eventDate,
+        location,
+        createdBy: userId,
+      });
+
+      return res.status(200).json({
+        message: "Event created successfully!",
+        code: "EVENT_CREATED",
+        event,
+      });
+    } else if (type === "opportunity") {
+      const { opportunityDetails, visibility } = req.body;
+
+      if (!opportunityDetails) {
+        return res.status(400).json({
+          message: "Invalid request! Please try again.",
+          code: "INVALID_REQUEST",
+        });
+      }
+
+      const opportunity = await createInvestmentOpportunity({
+        opportunityDetails,
+        visibility,
+      });
+
+      return res.status(200).json({
+        message: "Investment opportunity created successfully!",
+        code: "INVESTMENT_OPPORTUNITY_CREATED",
+        opportunity,
+      });
+    }
+
+    return res.status(400).json({
+      message: "Invalid request! Please try again.",
+      code: "INVALID_REQUEST",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// stats
+export const getStats = async (req: Request, res: Response) => {
+  try {
+    const stats = await getStartupStats();
+
+    return res.status(200).json({
+      message: "Stats fetched successfully!",
+      code: "STATS_FETCHED",
+      stats: stats,
     });
   } catch (err) {
     console.log(err);

@@ -9,8 +9,6 @@ const Redirect = ({ to, update, logout }) => {
     const router = useRouter();
     const dispatch = useDispatch();
 
-    console.log("logout",logout)
-
     React.useEffect(() => {
         if (update) {
             dispatch(updateUser(update));

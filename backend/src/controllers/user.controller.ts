@@ -2,7 +2,9 @@ import { Request, Response } from "express";
 import {
   addMemberToStartup,
   deleteAllMembersFromStartup,
+  getAllInfo,
   getAllPublicStartups,
+  getMyAllocatedWorkspace,
   getStartupMembers,
   getUserFromEmail,
   getUserFromId,
@@ -10,6 +12,7 @@ import {
   getUserStartup,
   registerNewStartup,
   requestForWorkspace,
+  requestMentorship,
   updateStartup,
   updateUserProfile,
 } from "../services/user.service";
@@ -370,3 +373,105 @@ export const getPublicStartups = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
+export const getAllocatedWorkspace = async (req: Request, res: Response) => {
+  try {
+    const { userId } = res.locals;
+
+    const user = await getUserFromId(userId);
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User does not exist!",
+        code: "USER_DOES_NOT_EXIST",
+      });
+    }
+
+    const workspace = await getMyAllocatedWorkspace(userId);
+
+    if (!workspace) {
+      return res.status(400).json({
+        message: "Workspace does not exist!",
+        code: "WORKSPACE_DOES_NOT_EXIST",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Workspace fetched successfully!",
+      code: "WORKSPACE_FETCHED",
+      workspace,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export const requestForMentorship = async (req: Request, res: Response) => {
+  try {
+    const { userId } = res.locals;
+    const user = await getUserFromId(userId);
+    if (!user) {
+      return res.status(400).json({
+        message: "User does not exist!",
+        code: "USER_DOES_NOT_EXIST",
+      });
+    }
+
+    const { area_of_interest, available_days, request_details } = req.body;
+
+    if (!area_of_interest || !available_days || !request_details) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const mentorshipRequest = await requestMentorship({
+      area_of_interest,
+      available_days,
+      request_details,
+      userId,
+    });
+
+    return res.status(200).json({
+      message: "Mentorship request added successfully!",
+      code: "MENTORSHIP_REQUEST_ADDED",
+      mentorshipRequest,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+// Dashboard
+
+export const getUserDashboard = async (req: Request, res: Response) => {
+
+  try {
+    const { userId } = res.locals;
+
+    const user = getUserFromId(userId);
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User does not exist!",
+        code: "USER_DOES_NOT_EXIST",
+      });
+    }
+
+    const dashboard = await getAllInfo();
+
+    console.log(dashboard);
+
+    return res.status(200).json({
+      message: "User dashboard fetched successfully!",
+      code: "DASHBOARD_FETCHED",
+      dashboard,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}

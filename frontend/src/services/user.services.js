@@ -41,3 +41,18 @@ export const getWorkspaceRequest = async() => {
   const response = await apiClient.get("/user/workspace/request");
   return response.data;
 }
+
+export const getWorkspaceAllocated = async() => {
+  const response = await apiClient.get("/user/my-workspace");
+  return response.data;
+}
+
+export const requestMentorship = async(body) => {
+  const response = await apiClient.post("/user/mentorship/request", body);
+  return response.data;
+}
+
+export const getUserDashboard = async() => {
+  const response = await apiClient.get("/user/dashboard");
+  return response.data;
+}

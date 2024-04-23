@@ -7,7 +7,6 @@ import moment from 'moment';
 
 const WorkspaceAllocationsTable = ({ data, setUserAllocation }) => {
 
-
     const columns = [
         {
             title: "Workspace",

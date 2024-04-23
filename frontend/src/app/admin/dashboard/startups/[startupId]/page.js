@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
+import formStyles from "@/styles/components/Form.module.scss";
 import styles from "@/styles/pages/admin/Startup.module.scss";
 import { Form, Input, Row, Select, message } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import PrimaryButton from "@/components/common/PrimaryButton";
-import formStyles from "@/styles/components/Form.module.scss";
 import { getStartup, updateStartupStatus } from "@/services/admin.services";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import LoaderPage from "@/components/common/Loader/LoaderPage";

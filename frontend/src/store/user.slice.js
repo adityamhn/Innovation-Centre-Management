@@ -15,6 +15,7 @@ export const userSlice = createSlice({
     updateUser: (state, action) => {
       const prevUser = state.user;
       state.user = { ...prevUser, ...action.payload };
+      state.isLoggedIn = true;
     },
     logoutAccount: (state) => {
       state.user = null;

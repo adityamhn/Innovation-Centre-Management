@@ -94,9 +94,14 @@ const RegisterStartup = () => {
     <>
       {contextHolder}
       <div className={styles.registerStartupContainer}>
-        <h1 className={styles.layoutTitle}>Register your startup</h1>
+        <h1 className={styles.layoutTitle}>{data?.startup?.status === "approved" ? "Your Startup": "Register your startup"}</h1>
         <p className={styles.layoutDesc}>
           Register your startup to get access to the MIT Innovation Centre.
+          {
+            data?.startup?.status === "approved" && (
+              " You can update the details of your startup here."
+            )
+          }
         </p>
         {data?.startup?.status === "pending" && (
           <Alert

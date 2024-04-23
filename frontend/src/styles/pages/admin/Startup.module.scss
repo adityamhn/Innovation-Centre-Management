@@ -1,1 +1,30 @@
 @import "../../_variables";
+
+.registerStartupContainer {
+
+    .statsContainer {
+        margin-top: 4rem;
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+
+        .stat {
+            border: 1px solid var(--border);
+            width: fit-content;
+            padding: 1rem 1.5rem;
+            width:18rem;
+            border-radius: 6px;
+
+            .key {
+                font-size: nth($fontSize, 3);
+                color: var(--text-secondary);
+                margin-top: 0.5rem;
+            }
+
+            .value {
+                font-size: nth($fontSize, 5);
+                font-weight: 600;
+            }
+        }
+    }
+}

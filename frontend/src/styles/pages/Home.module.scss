@@ -2,7 +2,12 @@
 
 .homeContainer {
     padding: 0 4rem;
-    // min-height: calc(100vh - 120px);
+    height: calc(100vh - 120px);
+    background: url("../../assets/home.svg") no-repeat 0% center/cover;
+    margin:0;
+
+   
+
 
     .homeContent {
         display: flex;
@@ -12,6 +17,7 @@
         .homeTitle {
             font-size: nth($fontSize,10);
             margin-bottom: 0;
+            color:#fff;
         }
 
         .homeDesc {
@@ -19,7 +25,7 @@
             font-size: nth($fontSize,5);
             margin-bottom: 0;
             line-height: 1.6;
-            color: var(--text-secondary);
+            color:#e1e1e1;
         }
     }
 }

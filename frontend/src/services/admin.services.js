@@ -75,3 +75,14 @@ export const deleteAllocation = async (id) => {
   const response = await apiClient.post(`/admin/workspace/allocations/${id}/delete`);
   return response.data;
 }
+
+export const addInfo = async (body) => {
+  const response = await apiClient.post("/admin/info/add", body);
+  return response.data;
+}
+
+
+export const getAdminStats = async () => {
+  const response = await apiClient.get("/admin/stats/");
+  return response.data;
+}
