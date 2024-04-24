@@ -13,6 +13,7 @@ import {
 } from "@/services/user.services";
 import LoaderPage from "@/components/common/Loader/LoaderPage";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import ConfettiGenerator from "confetti-js";
 
 const RegisterStartup = () => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -28,7 +29,7 @@ const RegisterStartup = () => {
         pitch_video_url: data.startup?.pitch_video_url,
         logo_url: data.startup?.logo_url,
         industries: data.startup?.industry,
-        website_url: data.startup?.website_url, 
+        website_url: data.startup?.website_url,
         members: data.startup?.members,
       });
     },
@@ -89,6 +90,21 @@ const RegisterStartup = () => {
     });
   };
 
+  React.useEffect(() => {
+    if (data?.startup?.status === "approved") {
+      const confettiSettings = { target: "my-canvas" };
+      const confetti = new ConfettiGenerator(confettiSettings);
+
+      confetti.render();
+
+      setTimeout(() => {
+        confetti.clear();
+      }, 5000);
+
+      return () => confetti.clear();
+    }
+  }, [data?.startup?.status]);
+
   if (isLoading || !data) {
     <LoaderPage />;
   }
@@ -96,6 +112,17 @@ const RegisterStartup = () => {
   return (
     <>
       {contextHolder}
+      <canvas
+        id="my-canvas"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex:0
+        }}
+      ></canvas>
       <div className={styles.registerStartupContainer}>
         <h1 className={styles.layoutTitle}>
           {data?.startup?.status === "approved"
@@ -305,10 +332,10 @@ const RegisterStartup = () => {
                       <h4 className={styles.memberTitle}>
                         Team Member {index + 1}
                       </h4>
-                        <MinusCircleOutlined
-                          onClick={() => remove(name)}
-                          style={{ fontSize: 20 }}
-                        />
+                      <MinusCircleOutlined
+                        onClick={() => remove(name)}
+                        style={{ fontSize: 20 }}
+                      />
                     </Row>
                     <Form.Item
                       {...restField}

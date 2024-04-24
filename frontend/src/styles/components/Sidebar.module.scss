@@ -8,6 +8,9 @@
     left: 0;
     border-right: 1px solid var(--border);
     padding-top: 4rem;
+    z-index: 2;
+
+
     .sidebarItemsContainer {
         display: flex;
         flex-direction: column;

@@ -8,6 +8,7 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { getUserProfile, updateUserProfile } from "@/services/user.services";
 import LoaderPage from "@/components/common/Loader/LoaderPage";
+import moment from "moment";
 
 const UserProfile = () => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -48,7 +49,12 @@ const UserProfile = () => {
           form={form}
           className={`${formStyles.formContainer} ${styles.registerForm}`}
           layout="vertical"
-          initialValues={data?.user}
+          initialValues={{
+            ...data?.user,
+            date_of_birth: data?.user.date_of_birth
+              ? moment(data?.user.date_of_birth)
+              : null,
+          }}
           onFinish={handleSubmit}
         >
           <Form.Item

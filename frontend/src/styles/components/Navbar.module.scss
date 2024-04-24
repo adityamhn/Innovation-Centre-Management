@@ -6,6 +6,8 @@
     border-bottom: 1px solid var(--border);
     width: 100%;
     margin: 0;
+    position: relative;
+    z-index: 2;
 
     .logoContainer {
         gap: 10px;

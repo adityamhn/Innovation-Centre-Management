@@ -22,7 +22,7 @@ CREATE TABLE startups (
     website_url VARCHAR(100),
     pitch_deck_url VARCHAR(100),
     pitch_video_url VARCHAR(100),
-    logo_url VARCHAR(100),
+    logo_url VARCHAR(500),
     startup_admin INT REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     industry VARCHAR[] NOT NULL,
