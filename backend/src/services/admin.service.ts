@@ -1,30 +1,96 @@
-import e from "express";
 import { pool } from "../db/db";
 import { getStartupMembers, getUserFromId } from "./user.service";
 
 export const getAllStartups = async () => {
-  const res = await pool.query("SELECT * FROM startups");
+  const query = `
+    SELECT 
+      s.id, 
+      s.name, 
+      s.description, 
+      s.website_url, 
+      s.pitch_deck_url, 
+      s.pitch_video_url, 
+      s.logo_url, 
+      s.startup_admin, 
+      s.created_at, 
+      s.industry, 
+      s.status, 
+      s.public_profile,
+      m.user_id AS member_user_id,
+      m.role AS member_role,
+      u.id AS user_id,
+      u.name AS user_name,
+      u.email AS user_email,
+      u.is_mahe AS user_is_mahe,
+      u.reg_no AS user_reg_no,
+      u.date_of_birth AS user_date_of_birth,
+      u.contact AS user_contact,
+      u.is_admin AS user_is_admin,
+      u.created_at AS user_created_at
+    FROM startups AS s
+    LEFT JOIN startup_members AS m ON s.id = m.startup_id
+    LEFT JOIN users AS u ON u.id = m.user_id OR u.id = s.startup_admin
+    ORDER BY s.id, m.user_id`;
 
-  const startups = res.rows;
+  const res = await pool.query(query);
+  
+  const startups = [];
+  const startupMap:any = {};
 
-  for (const startup of startups) {
-    const members = await getStartupMembers(startup.id);
-
-    for (const member of members) {
-      const user = await getUserFromId(member.user_id);
-      member.user = user;
+  for (const row of res.rows) {
+    if (!startupMap[row.id]) {
+      startupMap[row.id] = {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        website_url: row.website_url,
+        pitch_deck_url: row.pitch_deck_url,
+        pitch_video_url: row.pitch_video_url,
+        logo_url: row.logo_url,
+        created_at: row.created_at,
+        industry: row.industry,
+        status: row.status,
+        public_profile: row.public_profile,
+        startup_admin: {
+          id: row.user_id,
+          name: row.user_name,
+          email: row.user_email,
+          is_mahe: row.user_is_mahe,
+          reg_no: row.user_reg_no,
+          date_of_birth: row.user_date_of_birth,
+          contact: row.user_contact,
+          is_admin: row.user_is_admin,
+          created_at: row.user_created_at
+        },
+        members: []
+      };
+      startups.push(startupMap[row.id]);
     }
 
-    const admin = await getUserFromId(startup.startup_admin);
-    startup.startup_admin = admin;
-    startup.members = members;
+    if (row.member_user_id) {
+      startupMap[row.id].members.push({
+        user_id: row.member_user_id,
+        role: row.member_role,
+        user: {
+          id: row.user_id,
+          name: row.user_name,
+          email: row.user_email,
+          is_mahe: row.user_is_mahe,
+          reg_no: row.user_reg_no,
+          date_of_birth: row.user_date_of_birth,
+          contact: row.user_contact,
+          is_admin: row.user_is_admin,
+          created_at: row.user_created_at
+        }
+      });
+    }
   }
 
-  return res.rows;
+  return startups;
 };
 
 export const getStartupFromId = async (startupId: string) => {
-  const res = await pool.query("SELECT * FROM startups WHERE id = $1", [
+  const res = await pool.query("SELECT id, name, description, website_url, pitch_deck_url, pitch_video_url, logo_url, startup_admin, created_at, industry, status, public_profile FROM startups WHERE id = $1", [
     startupId,
   ]);
 
@@ -69,14 +135,14 @@ export const updateStartupPublic = async (
 }
 
 export const getAllUsers = async () => {
-  const res = await pool.query("SELECT * FROM users");
+  const res = await pool.query("SELECT id, name, reg_no, email, password, created_at, is_mahe, is_admin, date_of_birth, contact FROM users");
 
   return res.rows;
 };
 
 export const getUserStartupMember = async (userId: string) => {
   const res = await pool.query(
-    "SELECT * FROM startup_members WHERE user_id = $1",
+    "SELECT startup_id, user_id, role FROM startup_members WHERE user_id = $1",
     [userId]
   );
 
@@ -151,13 +217,13 @@ export const updateWorkspace = async ({
 };
 
 export const getAllWorkspaces = async () => {
-  const res = await pool.query("SELECT * FROM workspaces");
+  const res = await pool.query("SELECT workspace_id, name, location, size, amenities, available, description FROM workspaces");
 
   return res.rows;
 };
 
 export const getWorkspaceFromId = async (workspaceId: string) => {
-  const res = await pool.query("SELECT * FROM workspaces WHERE workspace_id = $1", [
+  const res = await pool.query("SELECT workspace_id, name, location, size, amenities, available, description FROM workspaces WHERE workspace_id = $1", [
     workspaceId,
   ]);
 
@@ -165,15 +231,57 @@ export const getWorkspaceFromId = async (workspaceId: string) => {
 }
 
 export const getAllWorkspaceRequests = async () => {
-  const res = await pool.query("SELECT * FROM workspace_requests");
+  const query = `
+    SELECT 
+      wr.request_id, 
+      wr.workspace_type, 
+      wr.requester_id, 
+      wr.reason, 
+      wr.members_count, 
+      wr.from_date, 
+      wr.to_date, 
+      wr.status, 
+      wr.request_date,
+      u.id AS user_id,
+      u.name AS user_name,
+      u.email AS user_email,
+      u.is_mahe AS user_is_mahe,
+      u.reg_no AS user_reg_no,
+      u.date_of_birth AS user_date_of_birth,
+      u.contact AS user_contact,
+      u.is_admin AS user_is_admin,
+      u.created_at AS user_created_at
+    FROM workspace_requests AS wr
+    JOIN users AS u ON wr.requester_id = u.id`;
 
-  for (const request of res.rows) {
-    const user = await getUserFromId(request.requester_id);
-    request.user = user;
-  }
+  const res = await pool.query(query);
 
-  return res.rows;
+  const requests = res.rows.map(request => ({
+    request_id: request.request_id,
+    workspace_type: request.workspace_type,
+    requester_id: request.requester_id,
+    reason: request.reason,
+    members_count: request.members_count,
+    from_date: request.from_date,
+    to_date: request.to_date,
+    status: request.status,
+    request_date: request.request_date,
+    user: {
+      id: request.user_id,
+      name: request.user_name,
+      email: request.user_email,
+      is_mahe: request.user_is_mahe,
+      reg_no: request.user_reg_no,
+      date_of_birth: request.user_date_of_birth,
+      contact: request.user_contact,
+      is_admin: request.user_is_admin,
+      created_at: request.user_created_at
+    }
+  }));
+
+  return requests;
 };
+
 
 export const updateWorkspaceRequestStatus = async (
   requestId: string,
@@ -222,7 +330,7 @@ export const allocateWorkspace = async ({
 };
 
 export const getWorkspaceAllocations = async () => {
-  const res = await pool.query("SELECT * FROM workspace_allocations");
+  const res = await pool.query("SELECT allocation_id, workspace_id, start_date, user_id, startup_id, end_date FROM workspace_allocations");
 
   for (const allocation of res.rows) {
     const user = await getUserFromId(allocation.user_id);
@@ -269,7 +377,7 @@ export const createEvent = async ({
 }
 
 export const getAllEvents = async () => {
-  const res = await pool.query("SELECT * FROM events");
+  const res = await pool.query("SELECT event_id, title, description, event_date, location, created_by, posted_at FROM events");
 
   for (const event of res.rows) {
     const user = await getUserFromId(event.created_by);
@@ -298,7 +406,7 @@ export const createNews = async ({
 
 
 export const getAllNews = async () => {
-  const res = await pool.query("SELECT * FROM news");
+  const res = await pool.query("SELECT news_id, title, content, posted_by, posted_at FROM news");
 
   for (const news of res.rows) {
     const user = await getUserFromId(news.posted_by);
@@ -324,21 +432,56 @@ export const createInvestmentOpportunity = async ({
 }
 
 export const getAllInvestmentOpportunities = async () => {
-  const res = await pool.query("SELECT * FROM investment_opportunities");
+  const res = await pool.query("SELECT opportunity_id, opportunity_details, visibility, posted_at FROM investment_opportunities");
 
   return res.rows;
 }
 
 
 export const getAllMentorshipRequests = async () => {
-  const res = await pool.query("SELECT * FROM mentorship_requests");
+ const query = `
+    SELECT 
+      mr.request_id, 
+      mr.area_of_interest, 
+      mr.available_days, 
+      mr.request_details, 
+      mr.user_id, 
+      mr.status, 
+      mr.requested_at,
+      u.id AS user_id, 
+      u.name AS user_name, 
+      u.email AS user_email, 
+      u.is_mahe AS user_is_mahe, 
+      u.reg_no AS user_reg_no, 
+      u.date_of_birth AS user_date_of_birth, 
+      u.contact AS user_contact, 
+      u.is_admin AS user_is_admin, 
+      u.created_at AS user_created_at
+    FROM mentorship_requests AS mr
+    JOIN users AS u ON mr.user_id = u.id`;
 
-  for (const request of res.rows) {
-    const user = await getUserFromId(request.user_id);
-    request.user = user;
-  }
+  const res = await pool.query(query);
+  const requests = res.rows.map(request => ({
+    request_id: request.request_id,
+    area_of_interest: request.area_of_interest,
+    available_days: request.available_days,
+    request_details: request.request_details,
+    status: request.status,
+    requested_at: request.requested_at,
+    user: {
+      id: request.user_id,
+      name: request.user_name,
+      email: request.user_email,
+      is_mahe: request.user_is_mahe,
+      reg_no: request.user_reg_no,
+      date_of_birth: request.user_date_of_birth,
+      contact: request.user_contact,
+      is_admin: request.user_is_admin,
+      created_at: request.user_created_at
+    }
+  }));
 
-  return res.rows;
+  return requests;
 }
 
 export const updateMentorshipRequestStatus = async (

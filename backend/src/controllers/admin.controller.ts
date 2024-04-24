@@ -65,7 +65,9 @@ export const adminLogin = async (req: Request, res: Response) => {
       });
     }
 
-    const passwordIsValid = await MatchPassword(password, user.password, true);
+    console.log(user);
+
+    const passwordIsValid = await MatchPassword(password, user.id, true);
 
     if (!passwordIsValid) {
       return res.status(400).json({

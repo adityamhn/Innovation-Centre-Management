@@ -44,9 +44,15 @@ export const updateUserProfile = async ({
 
 export const MatchPassword = async (
   password: string,
-  userPasswordHash: string,
+  userId: string,
   isAdmin: boolean
 ) => {
+  const res = await pool.query("SELECT password FROM users WHERE id = $1", [
+    userId,
+  ]);
+
+  const userPasswordHash = res.rows[0].password;
+
   if (isAdmin) {
     return password === userPasswordHash;
   }

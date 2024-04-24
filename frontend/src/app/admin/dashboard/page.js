@@ -6,6 +6,7 @@ import { useQuery } from "react-query";
 import { getAdminStats } from "@/services/admin.services";
 import LoaderPage from "@/components/common/Loader/LoaderPage";
 
+
 const AdminDashboard = () => {
   const [stats,setStats] = useState(null);
 
@@ -13,14 +14,14 @@ const AdminDashboard = () => {
   {
     onSuccess: (data) => {
       setStats({
-        "Total Users": 521,
-        "Total Approved Startups": 25,
-        "Total Alumni Startups": 18,
-        "Total Pending Startups": 7,
-        "Total Invalid Startups": 9,
-        "Total Workspaces": 16,
-        "Total Pending Workspace Requests": 4,
-        "Total Pending Mentorship Requests": 1
+        "Total Users": data.stats.total_users,
+        "Total Approved Startups": data.stats.total_approved_startups,
+        "Total Alumni Startups": data.stats.total_alumni_startups,
+        "Total Pending Startups": data.stats.total_pending_startups,
+        "Total Invalid Startups": data.stats.total_invalid_startups,
+        "Total Workspaces": data.stats.total_workspaces,
+        "Total Pending Workspace Requests": data.stats.total_pending_workspace_requests,
+        "Total Pending Mentorship Requests": data.stats.total_pending_mentorship_requests
       })
     },
     refetchInterval: 5000
