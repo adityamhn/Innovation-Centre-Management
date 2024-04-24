@@ -35,7 +35,7 @@ const AddInformation = () => {
     <>
       {contextHolder}
       <div className={styles.registerStartupContainer}>
-        <h1 className={styles.layoutTitle}>Startup Details</h1>
+        <h1 className={styles.layoutTitle}>Broadcast News</h1>
 
         <Form
           form={form}

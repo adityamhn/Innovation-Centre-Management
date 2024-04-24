@@ -14,6 +14,7 @@ import {
   createNewWorkspace,
   createNews,
   deleteAllocation,
+  getAllMentorshipRequests,
   getAllStartups,
   getAllUsers,
   getAllWorkspaceRequests,
@@ -23,6 +24,7 @@ import {
   getUserStartupMember,
   getWorkspaceAllocations,
   getWorkspaceFromId,
+  updateMentorshipRequestStatus,
   updateStartupPublic,
   updateStartupStatus,
   updateWorkspace,
@@ -488,6 +490,53 @@ export const removeAllocation = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "Allocation deleted successfully!",
       code: "ALLOCATION_DELETED",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Mentorship
+export const getMentorshipRequests = async (req: Request, res: Response) => {
+  try {
+    const mentorshipRequests = await getAllMentorshipRequests();
+
+    return res.status(200).json({
+      message: "Mentorship requests fetched successfully!",
+      code: "MENTORSHIP_REQUESTS_FETCHED",
+      requests: mentorshipRequests,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const changeMentorshipRequestStatus = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { requestId } = req.params;
+    const { status } = req.body;
+
+    if (!requestId || !status) {
+      return res.status(400).json({
+        message: "Invalid request! Please try again.",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const workspaceRequest = await updateMentorshipRequestStatus(
+      requestId,
+      status
+    );
+
+    return res.status(200).json({
+      message: "Mentorship request status updated successfully!",
+      code: "MENTORSHIP_REQUEST_STATUS_UPDATED",
+      request: workspaceRequest,
     });
   } catch (err) {
     console.log(err);

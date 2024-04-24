@@ -57,6 +57,10 @@ const Sidebar = ({ admin }) => {
             path: "/admin/dashboard/workspace-allocation"
         },
         {
+            name: "Mentorship Requests",
+            path: "/admin/dashboard/mentorship-requests"
+        },
+        {
             name: "Add News",
             path: "/admin/dashboard/news"
         }

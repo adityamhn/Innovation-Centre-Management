@@ -28,6 +28,7 @@ const RegisterStartup = () => {
         pitch_video_url: data.startup?.pitch_video_url,
         logo_url: data.startup?.logo_url,
         industries: data.startup?.industry,
+        website_url: data.startup?.website_url, 
         members: data.startup?.members,
       });
     },
@@ -70,6 +71,7 @@ const RegisterStartup = () => {
         pitch_deck_url: values.pitch_deck_url,
         pitch_video_url: values.pitch_video_url,
         logo_url: values.logo_url,
+        website_url: values.website_url,
         industries: values.industries,
         members: values.members,
       });
@@ -81,6 +83,7 @@ const RegisterStartup = () => {
       pitch_deck_url: values.pitch_deck_url,
       pitch_video_url: values.pitch_video_url,
       logo_url: values.logo_url,
+      website_url: values.website_url,
       industries: values.industries,
       members: values.members,
     });
@@ -94,14 +97,15 @@ const RegisterStartup = () => {
     <>
       {contextHolder}
       <div className={styles.registerStartupContainer}>
-        <h1 className={styles.layoutTitle}>{data?.startup?.status === "approved" ? "Your Startup": "Register your startup"}</h1>
+        <h1 className={styles.layoutTitle}>
+          {data?.startup?.status === "approved"
+            ? "Your Startup"
+            : "Register your startup"}
+        </h1>
         <p className={styles.layoutDesc}>
           Register your startup to get access to the MIT Innovation Centre.
-          {
-            data?.startup?.status === "approved" && (
-              " You can update the details of your startup here."
-            )
-          }
+          {data?.startup?.status === "approved" &&
+            " You can update the details of your startup here."}
         </p>
         {data?.startup?.status === "pending" && (
           <Alert
@@ -176,6 +180,26 @@ const RegisterStartup = () => {
               style={{ minHeight: 200 }}
               className={`${formStyles.formInput}  ${styles.authEmailInput}`}
               placeholder="Enter your description"
+            />
+          </Form.Item>
+          <Form.Item
+            name="website_url"
+            label="Website URL"
+            className={`${formStyles.formItem} ${styles.formItem}`}
+            rules={[
+              {
+                required: true,
+                message: "Please input your website URL!",
+              },
+              {
+                type: "url",
+                message: "Please enter a valid URL!",
+              },
+            ]}
+          >
+            <Input
+              className={`${formStyles.formInput}  ${styles.authEmailInput}`}
+              placeholder="Enter your website URL"
             />
           </Form.Item>
           <Form.Item
@@ -281,12 +305,10 @@ const RegisterStartup = () => {
                       <h4 className={styles.memberTitle}>
                         Team Member {index + 1}
                       </h4>
-                      {fields.length > 1 && (
                         <MinusCircleOutlined
                           onClick={() => remove(name)}
                           style={{ fontSize: 20 }}
                         />
-                      )}
                     </Row>
                     <Form.Item
                       {...restField}

@@ -19,6 +19,7 @@ CREATE TABLE startups (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT,
+    website_url VARCHAR(100),
     pitch_deck_url VARCHAR(100),
     pitch_video_url VARCHAR(100),
     logo_url VARCHAR(100),

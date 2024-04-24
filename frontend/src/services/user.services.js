@@ -52,6 +52,11 @@ export const requestMentorship = async(body) => {
   return response.data;
 }
 
+export const getUserMentorshipRequests = async() => {
+  const response = await apiClient.get("/user/mentorship/request");
+  return response.data;
+}
+
 export const getUserDashboard = async() => {
   const response = await apiClient.get("/user/dashboard");
   return response.data;

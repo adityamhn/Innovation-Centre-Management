@@ -10,7 +10,7 @@ const StartupsLayout = ({ children }) => {
         <div className={styles.layoutContent}>
           <h1 className={styles.layoutTitle}>Startups at MIT Innovation centre</h1>
           <p className={styles.layoutDesc}>
-          Since 2007, we have proudly invested in 1,000+ companies addressing meaningful challenges and opportunities across six continents. The founders we back are visionary, determined, and diverse—they represent 145+ nationalities and 32% of companies have at least one woman founder.
+          The Innovation Centre at Manipal Academy of Higher Education is a hub for innovation, providing a platform for students, researchers, and entrepreneurs to bring their ideas to life. With cutting-edge facilities, seed funding support, incubation support, and mentorship, the university makes it easier for individuals to turn their innovative visions into reality.
           </p>
         </div>
         {children}

@@ -3,6 +3,7 @@ import { verifySession } from "../middlewares/auth/VerifySession.middleware";
 import {
   getAllocatedWorkspace,
   getMyWorkspaceRequest,
+  getPendingMentorshipRequests,
   getPublicStartups,
   getStartupDetails,
   getUserDashboard,
@@ -38,5 +39,7 @@ router.get("/workspace/request", [verifySession], getMyWorkspaceRequest);
 router.get("/my-workspace", [verifySession], getAllocatedWorkspace);
 
 router.post("/mentorship/request", [verifySession], requestForMentorship);
+
+router.get("/mentorship/request", [verifySession], getPendingMentorshipRequests);
 
 export { router as userRoutes };

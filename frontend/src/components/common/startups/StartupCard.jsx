@@ -1,15 +1,18 @@
 import React from 'react'
 import styles from "@/styles/pages/Startups.module.scss";
 import { Image, Row, Tag } from 'antd';
+import Link from 'next/link';
 
 const StartupCard = ({ startup }) => {
     return (
         <div className={styles.startupCard}>
-            <div className={styles.startupCardImageContainer}>
-                <Image preview={false} src={
-                    startup.logo_url ? startup.logo_url : "https://via.placeholder.com/150"
-                } className={styles.startupCardImage} alt="logo" />
-            </div>
+            <Link href={startup?.website_url} target="_blank">
+                <div className={styles.startupCardImageContainer}>
+                    <Image preview={false} src={
+                        startup.logo_url ? startup.logo_url : "https://via.placeholder.com/150"
+                    } className={styles.startupCardImage} alt="logo" />
+                </div>
+            </Link>
             <div className={styles.startupCardDetails}>
                 <Row className={styles.tags}>
                     {startup.industry.map((tag, i) => (

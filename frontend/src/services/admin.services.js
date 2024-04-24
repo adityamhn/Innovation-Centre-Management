@@ -53,6 +53,19 @@ export const getAllWorkspaceRequests = async () => {
   return response.data;
 }
 
+export const getAllMentorshipRequests = async () => {
+  const response = await apiClient.get("/admin/mentorship/requests");
+  return response.data;
+}
+
+export const changeMentorshipRequestStatus = async ({ requestId, status }) => {
+  const response = await apiClient.post(`/admin/mentorship/requests/${requestId}/update`, {
+    status,
+  });
+  return response.data;
+}
+
+
 
 export const changeWorkspaceRequestStatus = async ({ requestId, status }) => {
   const response = await apiClient.post(`/admin/workspace/requests/${requestId}/update`, {

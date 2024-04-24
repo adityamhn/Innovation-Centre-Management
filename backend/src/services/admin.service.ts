@@ -330,6 +330,30 @@ export const getAllInvestmentOpportunities = async () => {
 }
 
 
+export const getAllMentorshipRequests = async () => {
+  const res = await pool.query("SELECT * FROM mentorship_requests");
+
+  for (const request of res.rows) {
+    const user = await getUserFromId(request.user_id);
+    request.user = user;
+  }
+
+  return res.rows;
+}
+
+export const updateMentorshipRequestStatus = async (
+  requestId: string,
+  status: string
+) => {
+  const res = await pool.query(
+    "UPDATE mentorship_requests SET status = $1 WHERE request_id = $2",
+    [status, requestId]
+  );
+
+  return res.rows[0];
+}
+
+
 export const getStartupStats = async () => {
   try {
     const res = await pool.query("SELECT * FROM get_startup_stats();");

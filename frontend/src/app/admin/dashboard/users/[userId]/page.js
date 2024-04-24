@@ -20,8 +20,6 @@ const UsersPage = ({ params }) => {
     enabled: !!userId,
   });
 
-
-
   if (isLoading) {
     return <LoaderPage />;
   }
@@ -29,7 +27,7 @@ const UsersPage = ({ params }) => {
   return (
     <>
       <div className={styles.registerStartupContainer}>
-        <h1 className={styles.layoutTitle}>Startup Details</h1>
+        <h1 className={styles.layoutTitle}>User Details</h1>
 
         <Form
           form={form}

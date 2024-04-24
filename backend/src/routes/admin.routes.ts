@@ -3,8 +3,10 @@ import {
   addInformation,
   addNewWorkspace,
   adminLogin,
+  changeMentorshipRequestStatus,
   changeWorkspaceRequestStatus,
   getAllAllocations,
+  getMentorshipRequests,
   getStartupData,
   getStartups,
   getStats,
@@ -60,6 +62,17 @@ router.post(
   "/workspace/allocations/:allocationId/delete",
   [verifyAdminSession],
   removeAllocation
+);
+
+// Mentorship
+router.get("/mentorship/requests", [verifyAdminSession], getMentorshipRequests);
+
+
+router.post(
+  "/mentorship/requests/:requestId/update",
+  [verifyAdminSession],
+  changeMentorshipRequestStatus
+  
 );
 
 // information

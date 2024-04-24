@@ -1,23 +1,27 @@
 "use client";
 
 import PrimaryButton from "@/components/common/PrimaryButton";
-import { Form, Input, Row, message, notification } from "antd";
+import { Alert, Form, Input, Row, message, notification } from "antd";
 import React from "react";
 import formStyles from "@/styles/components/Form.module.scss";
 import styles from "@/styles/pages/RegisterStartup.module.scss";
-import { useMutation } from "react-query";
-import { requestMentorship } from "@/services/user.services";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { getUserMentorshipRequests, requestMentorship } from "@/services/user.services";
 
 
 const Mentorship = () => {
+  const queryClient = useQueryClient();
     const [notificationApi, contextHolder] = notification.useNotification();
 
+    const {data, isLoading} = useQuery("mentorship-request", getUserMentorshipRequests)
+
     const requestMutation = useMutation(requestMentorship, {
-        onSuccess: () => {
+        onSuccess: async () => {
             notificationApi.success({
                 message: "Mentorship request sent successfully",
                 description: "Your mentorship request has been sent successfully",
             });
+            await queryClient.invalidateQueries("mentorship-request");
         },
     })
 
@@ -34,6 +38,15 @@ const Mentorship = () => {
         request for mentorship. Innovative ideas need mentorship to grow and
         succeed. Our mentors are here to help you with your startup journey.
       </p>
+      {data?.requests && data?.requests?.length > 0 && (
+        <Alert
+          message="Mentorship Request Sent Successfully"
+          description="Your mentorship request has been sent successfully. You will be contacted by a mentor soon."
+          type="success"
+          showIcon
+          style={{ marginTop: "2rem" }}
+          />
+      )}
 
       <Form
         //   form={form}

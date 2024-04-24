@@ -104,7 +104,7 @@ const UserProfile = () => {
               <Radio value={false}>NON-MAHE</Radio>
             </Radio.Group>
           </Form.Item>
-          {isMahe && (
+          {data?.user.is_mahe && (
             <Form.Item
               label="Registration Number"
               className={`${formStyles.formItem}`}

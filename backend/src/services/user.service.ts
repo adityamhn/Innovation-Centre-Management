@@ -4,13 +4,19 @@ import bcrypt from "bcryptjs";
 import { getWorkspaceFromId } from "./admin.service";
 
 export const getUserFromEmail = async (email: string) => {
-  const res = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  const res = await pool.query(
+    "SELECT id, name, email, is_mahe, reg_no, date_of_birth, contact, is_admin, created_at FROM users WHERE email = $1",
+    [email]
+  );
 
   return res.rows[0];
 };
 
 export const getUserFromId = async (id: string) => {
-  const res = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+  const res = await pool.query(
+    "SELECT id, name, email, is_mahe, reg_no, date_of_birth, contact, is_admin, created_at FROM users WHERE id = $1",
+    [id]
+  );
 
   return res.rows[0];
 };
@@ -26,7 +32,6 @@ export const updateUserProfile = async ({
   name: string;
   userId: string;
 }) => {
-  console.log(date_of_birth);
   const formattedDateOfBirth = moment(date_of_birth).format("YYYY-MM-DD");
 
   const res = await pool.query(
@@ -79,10 +84,11 @@ export const registerNewStartup = async ({
   pitch_video_url,
   logo_url,
   industries,
+  website_url,
   userId,
 }: any) => {
   const res = await pool.query(
-    "INSERT INTO startups (name, description, pitch_deck_url, pitch_video_url, logo_url, industry, startup_admin) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+    "INSERT INTO startups (name, description, pitch_deck_url, pitch_video_url, logo_url, industry, website_url, startup_admin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
     [
       name,
       description,
@@ -90,6 +96,7 @@ export const registerNewStartup = async ({
       pitch_video_url,
       logo_url,
       industries,
+      website_url,
       userId,
     ]
   );
@@ -129,11 +136,11 @@ export const deleteAllMembersFromStartup = async (startupId: string) => {
   );
 
   return res.rows;
-}
+};
 
 export const getUserStartup = async (userId: string) => {
   const res = await pool.query(
-    "SELECT * FROM startups WHERE startup_admin = $1",
+    `SELECT id, name, description, website_url, pitch_deck_url, pitch_video_url, logo_url, industry, public_profile, status, created_at, startup_admin FROM startups WHERE startup_admin = $1`,
     [userId]
   );
 
@@ -147,19 +154,28 @@ export const updateStartup = async ({
   pitch_video_url,
   logo_url,
   industries,
+  website_url,
   startupId,
 }: any) => {
   const res = await pool.query(
-    "UPDATE startups SET name = $1, description = $2, pitch_deck_url = $3, pitch_video_url = $4, logo_url = $5, industry = $6 WHERE id = $7 RETURNING *",
-    [name, description, pitch_deck_url, pitch_video_url, logo_url, industries, startupId]
+    "UPDATE startups SET name = $1, description = $2, pitch_deck_url = $3, pitch_video_url = $4, logo_url = $5, industry = $6, website_url = $7 WHERE id = $8 RETURNING *",
+    [
+      name,
+      description,
+      pitch_deck_url,
+      pitch_video_url,
+      logo_url,
+      industries,
+      website_url,
+      startupId,
+    ]
   );
-
   return res.rows[0];
 };
 
 export const getStartupMembers = async (startupId: string) => {
   const res = await pool.query(
-    "SELECT * FROM startup_members WHERE startup_id = $1",
+    "SELECT startup_id, user_id, role FROM startup_members WHERE startup_id = $1",
     [startupId]
   );
 
@@ -198,7 +214,7 @@ export const requestForWorkspace = async ({
 
 export const getUserPendingWorkspaceRequests = async (userId: string) => {
   const res = await pool.query(
-    "SELECT * FROM workspace_requests WHERE requester_id = $1",
+    "SELECT request_id, workspace_type, requester_id, reason, members_count, from_date, to_date, status, request_date  FROM workspace_requests WHERE requester_id = $1",
     [userId]
   );
 
@@ -207,15 +223,15 @@ export const getUserPendingWorkspaceRequests = async (userId: string) => {
 
 export const getAllPublicStartups = async () => {
   const res = await pool.query(
-    "SELECT name, id, description, logo_url, industry, public_profile FROM startups WHERE public_profile = true"
+    "SELECT name, id, description, logo_url, website_url, industry, public_profile FROM startups WHERE public_profile = true"
   );
 
   return res.rows;
 };
 
-export const getMyAllocatedWorkspace = async (userId: string) => {  
+export const getMyAllocatedWorkspace = async (userId: string) => {
   const res = await pool.query(
-    "SELECT * FROM workspace_allocations WHERE user_id = $1",
+    "SELECT allocation_id, workspace_id, start_date, user_id, startup_id, end_date  FROM workspace_allocations WHERE user_id = $1",
     [userId]
   );
 
@@ -227,18 +243,7 @@ export const getMyAllocatedWorkspace = async (userId: string) => {
   }
 
   return allocation;
-
-}
-
-// CREATE TABLE mentorship_requests (
-//   request_id SERIAL PRIMARY KEY,
-//   area_of_interest TEXT NOT NULL,
-//   available_days TEXT NOT NULL,
-//   request_details TEXT,
-//   user_id INT REFERENCES users(id),
-//   status request_status DEFAULT 'pending',
-//   requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-// );
+};
 
 export const requestMentorship = async ({
   area_of_interest,
@@ -257,41 +262,31 @@ export const requestMentorship = async ({
   );
 
   return res.rows[0];
-}
+};
 
+export const getUserPendingMentorshipRequests = async (userId: string) => {
+  const res = await pool.query(
+    "SELECT request_id, area_of_interest, available_days, request_details, user_id, status FROM mentorship_requests WHERE user_id = $1 AND status = 'pending'",
+    [userId]
+  );
 
-// CREATE TABLE events (
-//   event_id SERIAL PRIMARY KEY,
-//   title VARCHAR(255) NOT NULL,
-//   description TEXT,
-//   event_date TIMESTAMP,
-//   location VARCHAR(255),
-//   created_by INT REFERENCES users(id),
-//   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-// );
-
-// CREATE TABLE news (
-//   news_id SERIAL PRIMARY KEY,
-//   title VARCHAR(255) NOT NULL,
-//   content TEXT NOT NULL,
-//   posted_by INT REFERENCES users(id),
-//   posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-// );
-
-// CREATE TABLE investment_opportunities (
-//   opportunity_id SERIAL PRIMARY KEY,
-//   opportunity_details TEXT NOT NULL,
-//   visibility BOOLEAN DEFAULT TRUE,
-//   posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-// );
+  return res.rows;
+};
 
 
 export const getAllInfo = async () => {
-  // get all news, events, opportunities in single array with type
-  const news = await pool.query("SELECT * FROM news");
-  const events = await pool.query("SELECT * FROM events");
-  const opportunities = await pool.query("SELECT * FROM investment_opportunities WHERE visibility = true");
 
+  const news = await pool.query(
+    "SELECT news_id, title, content, posted_by, posted_at FROM news"
+  );
+
+  const events = await pool.query(
+    "SELECT event_id, title, description, event_date, location, created_by, posted_at FROM events"
+  );
+
+  const opportunities = await pool.query(
+    "SELECT opportunity_id, opportunity_details, visibility, posted_at FROM investment_opportunities WHERE visibility = true"
+  );
   const final = [];
 
   for (const item of news.rows) {
@@ -309,11 +304,9 @@ export const getAllInfo = async () => {
     final.push(item);
   }
 
-  // sort by posted_at in descending order
   final.sort((a, b) => {
     return moment(b.posted_at).diff(moment(a.posted_at));
   });
 
-
   return final;
-}
+};

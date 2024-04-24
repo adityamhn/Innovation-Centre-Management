@@ -8,6 +8,7 @@ import {
   getStartupMembers,
   getUserFromEmail,
   getUserFromId,
+  getUserPendingMentorshipRequests,
   getUserPendingWorkspaceRequests,
   getUserStartup,
   registerNewStartup,
@@ -27,6 +28,7 @@ export const registerStartup = async (req: Request, res: Response) => {
       pitch_video_url,
       logo_url,
       industries,
+      website_url,
       members,
     } = req.body;
 
@@ -38,6 +40,7 @@ export const registerStartup = async (req: Request, res: Response) => {
       !pitch_deck_url ||
       !pitch_video_url ||
       !logo_url ||
+      !website_url ||
       !industries
     ) {
       return res.status(400).json({
@@ -62,6 +65,7 @@ export const registerStartup = async (req: Request, res: Response) => {
       pitch_video_url,
       logo_url,
       industries,
+      website_url,
       userId: user.id,
     });
 
@@ -165,6 +169,7 @@ export const updateStartupProfile = async (req: Request, res: Response) => {
       pitch_video_url,
       logo_url,
       industries,
+      website_url,
       members,
     } = req.body;
 
@@ -174,6 +179,7 @@ export const updateStartupProfile = async (req: Request, res: Response) => {
       !pitch_deck_url ||
       !pitch_video_url ||
       !logo_url ||
+      !website_url ||
       !industries
     ) {
       return res.status(400).json({
@@ -189,6 +195,7 @@ export const updateStartupProfile = async (req: Request, res: Response) => {
       pitch_video_url,
       logo_url,
       industries,
+      website_url,
       startupId: startup.id,
     });
 
@@ -445,6 +452,32 @@ export const requestForMentorship = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+export const getPendingMentorshipRequests = async (req: Request, res: Response) => {
+  try {
+    const { userId } = res.locals;
+    const user = await getUserFromId(userId);
+    if (!user) {
+      return res.status(400).json({
+        message: "User does not exist!",
+        code: "USER_DOES_NOT_EXIST",
+      });
+    }
+
+    const mentorshipRequests = await getUserPendingMentorshipRequests(userId);
+
+    return res.status(200).json({
+      message: "Mentorship requests fetched successfully!",
+      code: "MENTORSHIP_REQUESTS_FETCHED",
+      requests: mentorshipRequests,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+
 // Dashboard
 
 export const getUserDashboard = async (req: Request, res: Response) => {
