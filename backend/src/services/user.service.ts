@@ -180,19 +180,43 @@ export const updateStartup = async ({
 };
 
 export const getStartupMembers = async (startupId: string) => {
-  const res = await pool.query(
-    "SELECT startup_id, user_id, role FROM startup_members WHERE startup_id = $1",
-    [startupId]
-  );
+  const query = `
+    SELECT 
+      sm.startup_id, 
+      sm.user_id, 
+      sm.role,
+      u.name AS user_name,
+      u.email AS user_email,
+      u.is_mahe AS user_is_mahe,
+      u.reg_no AS user_reg_no,
+      u.date_of_birth AS user_date_of_birth,
+      u.contact AS user_contact,
+      u.is_admin AS user_is_admin,
+      u.created_at AS user_created_at
+    FROM startup_members sm
+    JOIN users u ON sm.user_id = u.id
+    WHERE sm.startup_id = $1
+  `;
 
-  const data = res.rows;
+  const res = await pool.query(query, [startupId]);
 
-  for (const user of data) {
-    const userData = await getUserFromId(user.user_id);
-    user.email = userData.email;
-  }
-
-  return data;
+  return res.rows.map(member => ({
+    startup_id: member.startup_id,
+    user_id: member.user_id,
+    role: member.role,
+    email: member.user_email,
+    user: {
+      id: member.user_id,
+      name: member.user_name,
+      email: member.user_email,
+      is_mahe: member.user_is_mahe,
+      reg_no: member.user_reg_no,
+      date_of_birth: member.user_date_of_birth,
+      contact: member.user_contact,
+      is_admin: member.user_is_admin,
+      created_at: member.user_created_at
+    }
+  }));
 };
 
 export const requestForWorkspace = async ({

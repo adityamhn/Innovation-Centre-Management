@@ -1,5 +1,5 @@
 import { pool } from "../db/db";
-import { getStartupMembers, getUserFromId } from "./user.service";
+import { getUserFromId } from "./user.service";
 
 export const getAllStartups = async () => {
   const query = `
@@ -11,104 +11,144 @@ export const getAllStartups = async () => {
       s.pitch_deck_url, 
       s.pitch_video_url, 
       s.logo_url, 
-      s.startup_admin, 
       s.created_at, 
       s.industry, 
       s.status, 
       s.public_profile,
-      m.user_id AS member_user_id,
-      m.role AS member_role,
-      u.id AS user_id,
-      u.name AS user_name,
-      u.email AS user_email,
-      u.is_mahe AS user_is_mahe,
-      u.reg_no AS user_reg_no,
-      u.date_of_birth AS user_date_of_birth,
-      u.contact AS user_contact,
-      u.is_admin AS user_is_admin,
-      u.created_at AS user_created_at
+      JSON_BUILD_OBJECT(
+        'id', u.id,
+        'name', u.name,
+        'email', u.email,
+        'is_mahe', u.is_mahe,
+        'reg_no', u.reg_no,
+        'date_of_birth', u.date_of_birth,
+        'contact', u.contact,
+        'is_admin', u.is_admin,
+        'created_at', u.created_at
+      ) AS startup_admin,
+      (
+        SELECT JSON_AGG(
+          JSON_BUILD_OBJECT(
+            'user_id', m.user_id,
+            'role', m.role,
+            'user', JSON_BUILD_OBJECT(
+              'id', mu.id,
+              'name', mu.name,
+              'email', mu.email,
+              'is_mahe', mu.is_mahe,
+              'reg_no', mu.reg_no,
+              'date_of_birth', mu.date_of_birth,
+              'contact', mu.contact,
+              'is_admin', mu.is_admin,
+              'created_at', mu.created_at
+            )
+          )
+        )
+        FROM startup_members AS m
+        JOIN users AS mu ON mu.id = m.user_id
+        WHERE m.startup_id = s.id
+      ) AS members
     FROM startups AS s
-    LEFT JOIN startup_members AS m ON s.id = m.startup_id
-    LEFT JOIN users AS u ON u.id = m.user_id OR u.id = s.startup_admin
-    ORDER BY s.id, m.user_id`;
+    LEFT JOIN users AS u ON u.id = s.startup_admin
+    ORDER BY s.id`;
 
   const res = await pool.query(query);
-  
-  const startups = [];
-  const startupMap:any = {};
-
-  for (const row of res.rows) {
-    if (!startupMap[row.id]) {
-      startupMap[row.id] = {
-        id: row.id,
-        name: row.name,
-        description: row.description,
-        website_url: row.website_url,
-        pitch_deck_url: row.pitch_deck_url,
-        pitch_video_url: row.pitch_video_url,
-        logo_url: row.logo_url,
-        created_at: row.created_at,
-        industry: row.industry,
-        status: row.status,
-        public_profile: row.public_profile,
-        startup_admin: {
-          id: row.user_id,
-          name: row.user_name,
-          email: row.user_email,
-          is_mahe: row.user_is_mahe,
-          reg_no: row.user_reg_no,
-          date_of_birth: row.user_date_of_birth,
-          contact: row.user_contact,
-          is_admin: row.user_is_admin,
-          created_at: row.user_created_at
-        },
-        members: []
-      };
-      startups.push(startupMap[row.id]);
-    }
-
-    if (row.member_user_id) {
-      startupMap[row.id].members.push({
-        user_id: row.member_user_id,
-        role: row.member_role,
-        user: {
-          id: row.user_id,
-          name: row.user_name,
-          email: row.user_email,
-          is_mahe: row.user_is_mahe,
-          reg_no: row.user_reg_no,
-          date_of_birth: row.user_date_of_birth,
-          contact: row.user_contact,
-          is_admin: row.user_is_admin,
-          created_at: row.user_created_at
-        }
-      });
-    }
-  }
-
-  return startups;
+  return res.rows.map(row => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    website_url: row.website_url,
+    pitch_deck_url: row.pitch_deck_url,
+    pitch_video_url: row.pitch_video_url,
+    logo_url: row.logo_url,
+    created_at: row.created_at,
+    industry: row.industry,
+    status: row.status,
+    public_profile: row.public_profile,
+    startup_admin: row.startup_admin,
+    members: row.members || []
+  }));
 };
 
 export const getStartupFromId = async (startupId: string) => {
-  const res = await pool.query("SELECT id, name, description, website_url, pitch_deck_url, pitch_video_url, logo_url, startup_admin, created_at, industry, status, public_profile FROM startups WHERE id = $1", [
-    startupId,
-  ]);
+  const query = `
+    SELECT
+      s.id, 
+      s.name, 
+      s.description, 
+      s.website_url, 
+      s.pitch_deck_url, 
+      s.pitch_video_url, 
+      s.logo_url, 
+      s.created_at, 
+      s.industry, 
+      s.status, 
+      s.public_profile,
+      JSON_BUILD_OBJECT(
+        'id', admin.id,
+        'name', admin.name,
+        'email', admin.email,
+        'is_mahe', admin.is_mahe,
+        'reg_no', admin.reg_no,
+        'date_of_birth', admin.date_of_birth,
+        'contact', admin.contact,
+        'is_admin', admin.is_admin,
+        'created_at', admin.created_at
+      ) AS startup_admin,
+      COALESCE(
+        (
+          SELECT JSON_AGG(
+            JSON_BUILD_OBJECT(
+              'user_id', m.user_id,
+              'role', m.role,
+              'name', u.name,
+              'email', u.email,
+              'is_mahe', u.is_mahe,
+              'reg_no', u.reg_no,
+              'date_of_birth', u.date_of_birth,
+              'contact', u.contact,
+              'is_admin', u.is_admin,
+              'created_at', u.created_at
+            )
+          ) 
+          FROM startup_members m
+          JOIN users u ON m.user_id = u.id
+          WHERE m.startup_id = s.id
+        ),
+        '[]'
+      ) AS members
+    FROM startups s
+    LEFT JOIN users admin ON s.startup_admin = admin.id
+    WHERE s.id = $1
+    GROUP BY s.id, admin.id`;
 
-  const startup = res.rows[0];
+  const res = await pool.query(query, [startupId]);
 
-  const members = await getStartupMembers(startup.id);
-
-  for (const member of members) {
-    const user = await getUserFromId(member.user_id);
-    member.user = user;
+  if (res.rows.length === 0) {
+    return null; // Or handle the case when no startup is found with the given ID
   }
 
-  const admin = await getUserFromId(startup.startup_admin);
-  startup.startup_admin = admin;
-  startup.members = members;
+  const startupData = res.rows[0];
+
+  const startup = {
+    id: startupData.id,
+    name: startupData.name,
+    description: startupData.description,
+    website_url: startupData.website_url,
+    pitch_deck_url: startupData.pitch_deck_url,
+    pitch_video_url: startupData.pitch_video_url,
+    logo_url: startupData.logo_url,
+    created_at: startupData.created_at,
+    industry: startupData.industry,
+    status: startupData.status,
+    public_profile: startupData.public_profile,
+    startup_admin: startupData.startup_admin,
+    members: startupData.members
+  };
 
   return startup;
 };
+
 
 export const updateStartupStatus = async (
   startupId: string,
@@ -329,24 +369,112 @@ export const allocateWorkspace = async ({
   return res.rows[0];
 };
 
+
 export const getWorkspaceAllocations = async () => {
-  const res = await pool.query("SELECT allocation_id, workspace_id, start_date, user_id, startup_id, end_date FROM workspace_allocations");
+  const query = `
+    SELECT 
+      wa.allocation_id, 
+      wa.workspace_id, 
+      wa.start_date, 
+      wa.user_id, 
+      wa.startup_id, 
+      wa.end_date,
+      JSON_BUILD_OBJECT(
+        'id', u.id,
+        'name', u.name,
+        'email', u.email,
+        'is_mahe', u.is_mahe,
+        'reg_no', u.reg_no,
+        'date_of_birth', u.date_of_birth,
+        'contact', u.contact,
+        'is_admin', u.is_admin,
+        'created_at', u.created_at
+      ) AS user,
+      COALESCE(
+        (
+          SELECT ROW_TO_JSON(s)
+          FROM (
+            SELECT
+              s.id, 
+              s.name, 
+              s.description, 
+              s.website_url, 
+              s.pitch_deck_url, 
+              s.pitch_video_url, 
+              s.logo_url, 
+              s.created_at, 
+              s.industry, 
+              s.status, 
+              s.public_profile,
+              JSON_BUILD_OBJECT(
+                'id', a.id,
+                'name', a.name,
+                'email', a.email,
+                'is_mahe', a.is_mahe,
+                'reg_no', a.reg_no,
+                'date_of_birth', a.date_of_birth,
+                'contact', a.contact,
+                'is_admin', a.is_admin,
+                'created_at', a.created_at
+              ) AS startup_admin,
+              COALESCE(
+                (
+                  SELECT JSON_AGG(
+                    JSON_BUILD_OBJECT(
+                      'user_id', m.user_id,
+                      'role', m.role,
+                      'name', um.name,
+                      'email', um.email,
+                      'is_mahe', um.is_mahe,
+                      'reg_no', um.reg_no,
+                      'date_of_birth', um.date_of_birth,
+                      'contact', um.contact,
+                      'is_admin', um.is_admin,
+                      'created_at', um.created_at
+                    )
+                  )
+                  FROM startup_members m
+                  JOIN users um ON m.user_id = um.id
+                  WHERE m.startup_id = wa.startup_id
+                ),
+                '[]'
+              ) AS members
+            FROM startups s
+            LEFT JOIN users a ON s.startup_admin = a.id
+            WHERE s.id = wa.startup_id
+          ) s
+        ),
+        '{}'
+      ) AS startup,
+      JSON_BUILD_OBJECT(
+        'workspace_id', ws.workspace_id,
+        'name', ws.name,
+        'location', ws.location,
+        'size', ws.size,
+        'amenities', ws.amenities,
+        'available', ws.available,
+        'description', ws.description
+      ) AS workspace
+    FROM workspace_allocations wa
+    JOIN workspaces ws ON wa.workspace_id = ws.workspace_id
+    JOIN users u ON wa.user_id = u.id
+  `;
 
-  for (const allocation of res.rows) {
-    const user = await getUserFromId(allocation.user_id);
-    allocation.user = user;
+  const res = await pool.query(query);
 
-    if (allocation.startup_id) {
-      const startup = await getStartupFromId(allocation.startup_id);
-      allocation.startup = startup;
-    }
+  return res.rows.map(allocation => ({
+    allocation_id: allocation.allocation_id,
+    workspace_id: allocation.workspace_id,
+    user_id: allocation.user_id,  
+    startup_id: allocation.startup_id,
+    start_date: allocation.start_date,
+    end_date: allocation.end_date,
+    user: allocation.user,
+    startup: allocation.startup,
+    workspace: allocation.workspace
+  }));
+};
 
-    const workspace = await getWorkspaceFromId(allocation.workspace_id);
-    allocation.workspace = workspace;
-  }
-
-  return res.rows;
-}
 
 export const deleteAllocation = async (allocationId: string) => {
   const res = await pool.query("DELETE FROM workspace_allocations WHERE allocation_id = $1", [allocationId]);
